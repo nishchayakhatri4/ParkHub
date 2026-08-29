@@ -1,10 +1,18 @@
 # ParkHub
 
+## Watch the pitch
+
+<a href="https://youtu.be/YcTpffHbx14?si=9BTni3reZ6PZNEXC">
+  <img src="https://img.youtube.com/vi/YcTpffHbx14/hqdefault.jpg" alt="Watch the ParkHub pitch on YouTube" width="420">
+</a>
+
+[Watch the ParkHub pitch on YouTube](https://youtu.be/YcTpffHbx14?si=9BTni3reZ6PZNEXC)
+
 > **"Can't park there, mate!"**
 
 ParkHub is a peer-to-peer parking space sharing platform that connects drivers looking for affordable parking with people who have unused private parking spaces.
 
-Instead of simply showing nearby parking spaces, ParkHub aims to recommend the **best parking option** based on price, distance, availability, safety, and convenience.
+Instead of simply showing nearby parking spaces, ParkHub aims to recommend the **best parking option** based on price, distance, availability, ratings, safety, and convenience.
 
 ## Project Overview
 
@@ -15,7 +23,7 @@ ParkHub connects these two sides:
 **Drivers**
 
 * Find available private parking spaces
-* Compare price, distance, safety, and convenience
+* Compare price, distance, ratings, safety, and convenience
 * Book parking for specific time periods
 * Pay securely
 * Check in and check out through the app
@@ -39,6 +47,7 @@ The ranking considers:
 * Price
 * Walking distance
 * Availability
+* Customer rating
 * Safety
 * Convenience
 
@@ -50,42 +59,38 @@ Example:
 Best Overall
 $8/day
 4 min walk
-ParkScore: 92
+4.9/5 stars (47 reviews)
 
 Cheapest
 $6/day
 8 min walk
-ParkScore: 86
+4.6/5 stars (31 reviews)
 
 Closest
 $10/day
 2 min walk
-ParkScore: 84
+4.8/5 stars (22 reviews)
 ```
 
-### ParkScore
+### Five-Star Ratings and Reviews
 
-Every parking space receives a **0 to 100 ParkScore** to help users evaluate trust and convenience.
+Drivers can rate completed parking bookings from **0 to 5 stars** and leave a written review. Listings show their average star rating and review count so users can compare previous customer experiences.
 
-Potential factors include:
+Listings also display useful trust and accessibility information, including:
 
 * Owner verification
-* User reviews
 * Lighting
 * CCTV/security
-* Location
-* Booking history
+* Accessibility notes
+* Reviews from previous bookings
 
 Example:
 
 ```text
-ParkScore: 92/100
-
-✓ Verified Owner
-✓ Well-lit
-✓ CCTV
-✓ 47 successful bookings
-★ 4.9 rating
+4.9/5 stars from 47 reviews
+Verified owner
+Well-lit
+CCTV available
 ```
 
 ### Time-Based Parking
@@ -196,15 +201,15 @@ I found 3 suitable spaces.
 
 1. $6/day
    8 minute walk
-   ParkScore 86
+   4.6/5 stars
 
 2. $7/day
    5 minute walk
-   ParkScore 91
+   4.9/5 stars
 
 3. $8/day
    4 minute walk
-   ParkScore 92
+   4.8/5 stars
 ```
 
 The AI assistant should use ParkHub's existing search and recommendation APIs rather than maintaining a separate parking system.
@@ -353,7 +358,7 @@ P0
 4. Parking search
 5. Availability
 6. Smart recommendation
-7. ParkScore
+7. Five-star ratings and reviews
 8. Parking details
 9. Booking
 10. Stripe test payment
@@ -383,7 +388,7 @@ SELECT DATE AND TIME
   ↓
 GET TOP 5 PARKING SPACES
   ↓
-VIEW PARKSCORE
+VIEW RATINGS AND REVIEWS
   ↓
 SELECT PARKING
   ↓
@@ -650,5 +655,3 @@ The goal is to deliver one **polished, working end-to-end experience** that clea
 ## License
 
 This project is being developed as a hackathon prototype.
-
-
