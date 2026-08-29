@@ -29,6 +29,8 @@ export default function Search() {
   const [endTime, setEndTime] = useState("16:00")
 
   const [parkingSpaces, setParkingSpaces] = useState([])
+  const [mapUrl, setMapUrl] = useState("")
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -68,6 +70,11 @@ export default function Search() {
       }
 
       setParkingSpaces(data)
+
+      // Use the exact same filters for the Folium map
+      setMapUrl(
+        `${API_URL}/parking/map?${params.toString()}`
+      )
     } catch (err) {
       console.error("Parking search error:", err)
 
@@ -78,12 +85,13 @@ export default function Search() {
       )
 
       setParkingSpaces([])
+      setMapUrl("")
     } finally {
       setLoading(false)
     }
   }
 
-  // Load initial Newtown results
+  // Initial search
   useEffect(() => {
     searchParking()
   }, [])
@@ -108,7 +116,6 @@ export default function Search() {
 
         {/* Search controls */}
         <div className="mb-8 rounded-2xl border bg-white p-4">
-
           <div className="grid gap-4 md:grid-cols-4">
 
             {/* Location */}
@@ -138,7 +145,10 @@ export default function Search() {
                 "
               >
                 {LOCATIONS.map((item) => (
-                  <option key={item} value={item}>
+                  <option
+                    key={item}
+                    value={item}
+                  >
                     {item}
                   </option>
                 ))}
@@ -161,7 +171,7 @@ export default function Search() {
               />
             </div>
 
-            {/* Start */}
+            {/* Start time */}
             <div className="space-y-2">
               <Label htmlFor="start-time">
                 Start time
@@ -177,7 +187,7 @@ export default function Search() {
               />
             </div>
 
-            {/* End */}
+            {/* End time */}
             <div className="space-y-2">
               <Label htmlFor="end-time">
                 End time
@@ -192,7 +202,6 @@ export default function Search() {
                 }
               />
             </div>
-
           </div>
 
           <Button
@@ -230,16 +239,14 @@ export default function Search() {
 
         {/* Results heading */}
         {!loading && !error && (
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">
-                Parking in {location}
-              </h2>
+          <div className="mb-5">
+            <h2 className="text-xl font-bold text-slate-900">
+              Parking in {location}
+            </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
-                {parkingSpaces.length} available spaces found
-              </p>
-            </div>
+            <p className="mt-1 text-sm text-slate-500">
+              {parkingSpaces.length} available spaces found
+            </p>
           </div>
         )}
 
@@ -250,30 +257,91 @@ export default function Search() {
           </div>
         )}
 
-        {/* No results */}
-        {!loading &&
-          !error &&
-          parkingSpaces.length === 0 && (
-            <div className="rounded-2xl border bg-white p-10 text-center">
-              <p className="font-semibold text-slate-900">
-                No parking spaces found
-              </p>
+        {/* Results + map */}
+        {!loading && !error && (
+          <div
+            className="
+              grid
+              gap-6
+              lg:grid-cols-[minmax(0,1fr)_minmax(380px,0.9fr)]
+            "
+          >
 
-              <p className="mt-2 text-sm text-slate-500">
-                Try another location or time.
-              </p>
+            {/* Map */}
+            <div className="order-1 lg:order-2">
+              <div
+                className="
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  bg-white
+                  shadow-sm
+                  lg:sticky
+                  lg:top-6
+                "
+              >
+                <div className="border-b px-4 py-3">
+                  <h2 className="font-bold text-slate-900">
+                    Map
+                  </h2>
+
+                  <p className="text-xs text-slate-500">
+                    Available parking in {location}
+                  </p>
+                </div>
+
+                {mapUrl ? (
+                  <iframe
+                    key={mapUrl}
+                    src={mapUrl}
+                    title={`Parking map for ${location}`}
+                    className="
+                      h-[420px]
+                      w-full
+                      border-0
+                      lg:h-[600px]
+                    "
+                  />
+                ) : (
+                  <div className="flex h-[420px] items-center justify-center text-sm text-slate-400">
+                    Search to view parking on the map.
+                  </div>
+                )}
+              </div>
             </div>
-          )}
 
-        {/* Parking cards */}
-        {!loading && parkingSpaces.length > 0 && (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {parkingSpaces.map((parking) => (
-              <ParkingCard
-                key={parking.parking_id}
-                parking={parking}
-              />
-            ))}
+            {/* Parking results */}
+            <div className="order-2 lg:order-1">
+              {parkingSpaces.length === 0 ? (
+                <div className="rounded-2xl border bg-white p-10 text-center">
+                  <p className="font-semibold text-slate-900">
+                    No parking spaces found
+                  </p>
+
+                  <p className="mt-2 text-sm text-slate-500">
+                    Try another location or time.
+                  </p>
+                </div>
+              ) : (
+                <div
+                  className="
+                    grid
+                    gap-6
+                    sm:grid-cols-2
+                    lg:grid-cols-1
+                    xl:grid-cols-2
+                  "
+                >
+                  {parkingSpaces.map((parking) => (
+                    <ParkingCard
+                      key={parking.parking_id}
+                      parking={parking}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 
