@@ -185,35 +185,6 @@ ParkHub supports separate user and owner accounts.
 
 The prototype may also include a demonstration MFA flow.
 
-### AI Parking Assistant
-
-An LLM-powered assistant is planned as a final priority feature.
-
-Example:
-
-```text
-User:
-Find me the cheapest parking near USYD tomorrow
-from 9 AM to 4 PM.
-
-ParkHub AI:
-I found 3 suitable spaces.
-
-1. $6/day
-   8 minute walk
-   4.6/5 stars
-
-2. $7/day
-   5 minute walk
-   4.9/5 stars
-
-3. $8/day
-   4 minute walk
-   4.8/5 stars
-```
-
-The AI assistant should use ParkHub's existing search and recommendation APIs rather than maintaining a separate parking system.
-
 ## Tech Stack
 
 | Component       | Technology                |
@@ -224,7 +195,6 @@ The AI assistant should use ParkHub's existing search and recommendation APIs ra
 | Database        | Supabase PostgreSQL       |
 | Maps            | Nominatim / OpenStreetMap |
 | Payments        | Stripe                    |
-| AI              | LLM API                   |
 | Version Control | Git + GitHub              |
 
 ## Architecture
@@ -242,10 +212,6 @@ The AI assistant should use ParkHub's existing search and recommendation APIs ra
           v          v          v
       Supabase   Nominatim   Stripe
       PostgreSQL OpenStreetMap Payments
-                     |
-                     v
-                    LLM
-              AI Assistant
 ```
 
 ## Project Structure
@@ -344,35 +310,6 @@ POST /bookings/{id}/cancel
 ```text
 POST /payments/create-checkout
 POST /payments/webhook
-```
-
-## Recommended Development Priorities
-
-The team should implement features in this order:
-
-```text
-P0
-1. Project foundation
-2. Authentication
-3. Parking listings
-4. Parking search
-5. Availability
-6. Smart recommendation
-7. Five-star ratings and reviews
-8. Parking details
-9. Booking
-10. Stripe test payment
-11. Check-in / check-out
-12. User dashboard
-13. Owner dashboard
-
-P1
-14. Favourites
-15. Demo MFA improvements
-
-P2
-16. AI chatbot
-17. Boat marketplace extension
 ```
 
 ## Demo Workflow
@@ -571,37 +508,6 @@ To stop either development server, press `Ctrl+C` in its terminal.
 - If PowerShell blocks virtual-environment activation, run `Set-ExecutionPolicy -Scope Process Bypass`, then activate the environment again.
 - Never commit `.env` files, database passwords, or API keys.
 
-## Git Workflow
-
-Use feature branches rather than working directly on `main`.
-
-Example:
-
-```text
-main
-│
-├── feature/login
-├── feature/search
-├── feature/booking
-├── feature/recommendation
-├── feature/payments
-├── feature/check-in
-└── feature/dashboard
-```
-
-Typical workflow:
-
-```bash
-git checkout -b feature/search
-
-git add .
-git commit -m "Add parking search"
-
-git push origin feature/search
-```
-
-Then create a pull request and merge into `main` after testing.
-
 ## What We Are Not Building
 
 To keep the hackathon prototype focused, the following are outside the initial scope:
@@ -610,7 +516,6 @@ To keep the hackathon prototype focused, the following are outside the initial s
 Real-time GPS tracking
 Complex insurance infrastructure
 Production-grade MFA
-Advanced AI agents
 Real-time navigation
 Complex tax infrastructure
 Native mobile applications
