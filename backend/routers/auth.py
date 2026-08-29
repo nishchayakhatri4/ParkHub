@@ -107,7 +107,7 @@ def register(payload: RegisterRequest) -> AuthResponse:
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Could not create account",
+            detail=f"Could not create account: {exc}",
         ) from exc
 
     return _build_auth_response(
