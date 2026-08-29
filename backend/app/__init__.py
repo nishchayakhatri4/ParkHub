@@ -1,0 +1,1 @@
+"""ParkHub FastAPI application package."""

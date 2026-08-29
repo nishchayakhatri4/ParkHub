@@ -1,0 +1,23 @@
+from typing import Literal
+from uuid import UUID
+
+from pydantic import BaseModel, HttpUrl
+
+
+class CheckoutRequest(BaseModel):
+    booking_id: UUID
+
+
+class CheckoutResponse(BaseModel):
+    checkout_url: HttpUrl
+    session_id: str
+
+
+class PaymentResponse(BaseModel):
+    id: UUID
+    booking_id: UUID
+    user_id: UUID
+    stripe_session_id: str
+    amount: int
+    currency: str
+    status: Literal["pending", "paid", "failed", "refunded"]
