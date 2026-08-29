@@ -1,3 +1,4 @@
+from services.supabase import get_connection
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

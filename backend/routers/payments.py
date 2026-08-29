@@ -2,52 +2,153 @@ from decimal import Decimal, ROUND_HALF_UP
 
 import stripe
 from fastapi import APIRouter, HTTPException, Request, status
+from psycopg.rows import dict_row
 
 from app.config import get_settings
 from app.dependencies import CurrentUserDep, UserClientDep
 from models.payment import CheckoutRequest, CheckoutResponse
 from models.user import MessageResponse
-from services.supabase import get_supabase_admin
+from services.supabase import get_connection
 
 
-router = APIRouter(prefix="/payments", tags=["Payments"])
+router = APIRouter(
+    prefix="/payments",
+    tags=["Payments"],
+)
 
 
 def _stripe_ready() -> None:
     settings = get_settings()
+
     if not settings.stripe_secret_key:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Stripe is not configured. Add test credentials to backend/.env.",
+            detail=(
+                "Stripe is not configured. "
+                "Add test credentials to backend/.env."
+            ),
         )
+
     stripe.api_key = settings.stripe_secret_key
 
 
-@router.post("/create-checkout", response_model=CheckoutResponse)
+@router.post(
+    "/create-checkout",
+    response_model=CheckoutResponse,
+)
 def create_checkout(
-    payload: CheckoutRequest, current_user: CurrentUserDep, client: UserClientDep
+    payload: CheckoutRequest,
+    current_user: CurrentUserDep,
+    client: UserClientDep,
 ) -> CheckoutResponse:
-    _stripe_ready()
-    booking = (
-        client.table("bookings").select("*,parking_spaces(title,address)")
-        .eq("id", str(payload.booking_id)).single().execute().data
-    )
-    if not booking or str(booking["user_id"]) != str(current_user.id):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
-    if booking["status"] != "pending":
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Only pending bookings can be paid")
 
-    amount_cents = int((Decimal(str(booking["total_price"])) * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    _stripe_ready()
+
+    with client.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            """
+            select
+                b.id,
+                b.user_id,
+                b.parking_id,
+                b.booking_date,
+                b.start_time,
+                b.end_time,
+                b.total_price,
+                b.status,
+                g.parking_name,
+                g.address
+            from public.bookings b
+            join public.garages g
+                on g.parking_id = b.parking_id
+            where b.id = %s
+            """,
+            (payload.booking_id,),
+        )
+
+        booking = cur.fetchone()
+
+    if (
+        booking is None
+        or booking["user_id"] != current_user.id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Booking not found",
+        )
+
+    if booking["status"] != "pending":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only pending bookings can be paid",
+        )
+
+    total_price = Decimal(
+        str(booking["total_price"])
+    )
+
+    amount_cents = int(
+        (total_price * 100).quantize(
+            Decimal("1"),
+            rounding=ROUND_HALF_UP,
+        )
+    )
+
     settings = get_settings()
-    admin = get_supabase_admin()
+
+    # Check whether this booking already has a payment.
+    with client.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            """
+            select
+                id,
+                stripe_session_id,
+                status
+            from public.payments
+            where booking_id = %s
+            order by created_at desc
+            limit 1
+            """,
+            (payload.booking_id,),
+        )
+
+        existing_payment = cur.fetchone()
+
+    if existing_payment:
+        if existing_payment["status"] == "paid":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Booking is already paid",
+            )
+
+        if (
+            existing_payment["status"] == "pending"
+            and existing_payment["stripe_session_id"]
+        ):
+            try:
+                previous_session = (
+                    stripe.checkout.Session.retrieve(
+                        existing_payment[
+                            "stripe_session_id"
+                        ]
+                    )
+                )
+
+                if (
+                    previous_session.status == "open"
+                    and previous_session.url
+                ):
+                    return CheckoutResponse(
+                        checkout_url=previous_session.url,
+                        session_id=previous_session.id,
+                    )
+
+            except stripe.StripeError:
+                # If the previous Stripe session cannot
+                # be reused, create a new one below.
+                pass
+
     try:
-        existing = admin.table("payments").select("*").eq("booking_id", str(payload.booking_id)).execute().data or []
-        if existing and existing[0]["status"] == "paid":
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Booking is already paid")
-        if existing and existing[0]["status"] == "pending":
-            previous_session = stripe.checkout.Session.retrieve(existing[0]["stripe_session_id"])
-            if previous_session.status == "open" and previous_session.url:
-                return CheckoutResponse(checkout_url=previous_session.url, session_id=previous_session.id)
         session = stripe.checkout.Session.create(
             mode="payment",
             payment_method_types=["card"],
@@ -57,63 +158,273 @@ def create_checkout(
                         "currency": "aud",
                         "unit_amount": amount_cents,
                         "product_data": {
-                            "name": f"ParkHub: {booking['parking_spaces']['title']}",
-                            "description": f"{booking['booking_date']} · {booking['start_time']}–{booking['end_time']}",
+                            "name": (
+                                "ParkHub: "
+                                f"{booking['parking_name']}"
+                            ),
+                            "description": (
+                                f"{booking['booking_date']} "
+                                f"· {booking['start_time']}"
+                                f"–{booking['end_time']}"
+                            ),
                         },
                     },
                     "quantity": 1,
                 }
             ],
-            success_url=f"{settings.frontend_url}/dashboard?payment=success&session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{settings.frontend_url}/parking/{booking['parking_space_id']}?payment=cancelled",
-            client_reference_id=str(payload.booking_id),
-            metadata={"booking_id": str(payload.booking_id), "user_id": str(current_user.id)},
+            success_url=(
+                f"{settings.frontend_url}"
+                "/dashboard"
+                "?payment=success"
+                "&session_id="
+                "{CHECKOUT_SESSION_ID}"
+            ),
+            cancel_url=(
+                f"{settings.frontend_url}"
+                f"/parking/{booking['parking_id']}"
+                "?payment=cancelled"
+            ),
+            client_reference_id=str(
+                payload.booking_id
+            ),
+            metadata={
+                "booking_id": str(
+                    payload.booking_id
+                ),
+                "user_id": str(
+                    current_user.id
+                ),
+            },
         )
-        admin.table("payments").upsert(
-            {
-                "booking_id": str(payload.booking_id), "user_id": str(current_user.id),
-                "stripe_session_id": session.id, "amount": amount_cents, "currency": "aud", "status": "pending",
-            }, on_conflict="booking_id"
-        ).execute()
-    except HTTPException:
-        raise
+
     except stripe.StripeError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Checkout already exists for this booking") from exc
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(exc),
+        ) from exc
+
     if not session.url:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Stripe did not return a checkout URL")
-    return CheckoutResponse(checkout_url=session.url, session_id=session.id)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=(
+                "Stripe did not return "
+                "a checkout URL"
+            ),
+        )
+
+    # Store amount in AUD, not cents.
+    with client.cursor() as cur:
+        if existing_payment:
+            cur.execute(
+                """
+                update public.payments
+                set
+                    stripe_session_id = %s,
+                    amount = %s,
+                    currency = 'aud',
+                    status = 'pending'
+                where id = %s
+                """,
+                (
+                    session.id,
+                    total_price,
+                    existing_payment["id"],
+                ),
+            )
+
+        else:
+            cur.execute(
+                """
+                insert into public.payments (
+                    booking_id,
+                    user_id,
+                    stripe_session_id,
+                    amount,
+                    currency,
+                    status
+                )
+                values (
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    'aud',
+                    'pending'
+                )
+                """,
+                (
+                    payload.booking_id,
+                    current_user.id,
+                    session.id,
+                    total_price,
+                ),
+            )
+
+    return CheckoutResponse(
+        checkout_url=session.url,
+        session_id=session.id,
+    )
 
 
-@router.post("/webhook", response_model=MessageResponse)
-async def stripe_webhook(request: Request) -> MessageResponse:
+@router.post(
+    "/webhook",
+    response_model=MessageResponse,
+)
+async def stripe_webhook(
+    request: Request,
+) -> MessageResponse:
+
     settings = get_settings()
+
     if not settings.stripe_webhook_secret:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Stripe webhook is not configured")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Stripe webhook is not configured",
+        )
+
     payload = await request.body()
-    signature = request.headers.get("stripe-signature")
+
+    signature = request.headers.get(
+        "stripe-signature"
+    )
+
     if not signature:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing Stripe signature")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing Stripe signature",
+        )
+
     try:
-        event = stripe.Webhook.construct_event(payload, signature, settings.stripe_webhook_secret)
-    except (ValueError, stripe.SignatureVerificationError) as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Stripe webhook") from exc
+        event = stripe.Webhook.construct_event(
+            payload,
+            signature,
+            settings.stripe_webhook_secret,
+        )
+
+    except (
+        ValueError,
+        stripe.SignatureVerificationError,
+    ) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid Stripe webhook",
+        ) from exc
 
     session = event["data"]["object"]
     session_id = session.get("id")
-    admin = get_supabase_admin()
-    if event["type"] in {"checkout.session.completed", "checkout.session.async_payment_succeeded"}:
-        if event["type"] == "checkout.session.completed" and session.get("payment_status") != "paid":
-            return MessageResponse(message="Webhook acknowledged; payment is processing")
-        payment_rows = admin.table("payments").select("*").eq("stripe_session_id", session_id).execute().data or []
-        if not payment_rows:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment record not found")
-        payment = payment_rows[0]
-        admin.table("payments").update({"status": "paid"}).eq("id", payment["id"]).execute()
-        admin.table("bookings").update({"status": "confirmed"}).eq("id", payment["booking_id"]).eq("status", "pending").execute()
-    elif event["type"] in {"checkout.session.expired", "checkout.session.async_payment_failed"}:
-        failed = admin.table("payments").update({"status": "failed"}).eq("stripe_session_id", session_id).execute().data or []
-        if failed:
-            admin.table("bookings").update({"status": "cancelled"}).eq("id", failed[0]["booking_id"]).eq("status", "pending").execute()
-    return MessageResponse(message="Webhook processed")
+
+    with get_connection() as conn:
+        with conn.cursor(
+            row_factory=dict_row
+        ) as cur:
+
+            if event["type"] in {
+                "checkout.session.completed",
+                "checkout.session.async_payment_succeeded",
+            }:
+
+                if (
+                    event["type"]
+                    == "checkout.session.completed"
+                    and session.get(
+                        "payment_status"
+                    )
+                    != "paid"
+                ):
+                    return MessageResponse(
+                        message=(
+                            "Webhook acknowledged; "
+                            "payment is processing"
+                        )
+                    )
+
+                cur.execute(
+                    """
+                    select
+                        id,
+                        booking_id
+                    from public.payments
+                    where stripe_session_id = %s
+                    """,
+                    (session_id,),
+                )
+
+                payment = cur.fetchone()
+
+                if payment is None:
+                    raise HTTPException(
+                        status_code=
+                            status.HTTP_404_NOT_FOUND,
+                        detail=(
+                            "Payment record "
+                            "not found"
+                        ),
+                    )
+
+                payment_intent = session.get(
+                    "payment_intent"
+                )
+
+                cur.execute(
+                    """
+                    update public.payments
+                    set
+                        status = 'paid',
+                        stripe_payment_intent_id = %s
+                    where id = %s
+                    """,
+                    (
+                        payment_intent,
+                        payment["id"],
+                    ),
+                )
+
+                cur.execute(
+                    """
+                    update public.bookings
+                    set status = 'confirmed'
+                    where
+                        id = %s
+                        and status = 'pending'
+                    """,
+                    (
+                        payment["booking_id"],
+                    ),
+                )
+
+            elif event["type"] in {
+                "checkout.session.expired",
+                "checkout.session.async_payment_failed",
+            }:
+
+                cur.execute(
+                    """
+                    update public.payments
+                    set status = 'failed'
+                    where stripe_session_id = %s
+                    returning booking_id
+                    """,
+                    (session_id,),
+                )
+
+                failed_payment = cur.fetchone()
+
+                if failed_payment:
+                    cur.execute(
+                        """
+                        update public.bookings
+                        set status = 'cancelled'
+                        where
+                            id = %s
+                            and status = 'pending'
+                        """,
+                        (
+                            failed_payment[
+                                "booking_id"
+                            ],
+                        ),
+                    )
+
+    return MessageResponse(
+        message="Webhook processed"
+    )

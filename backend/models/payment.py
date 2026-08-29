@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Literal
 from uuid import UUID
 
@@ -17,7 +18,13 @@ class PaymentResponse(BaseModel):
     id: UUID
     booking_id: UUID
     user_id: UUID
-    stripe_session_id: str
-    amount: int
+    stripe_session_id: str | None = None
+    stripe_payment_intent_id: str | None = None
+    amount: Decimal
     currency: str
-    status: Literal["pending", "paid", "failed", "refunded"]
+    status: Literal[
+        "pending",
+        "paid",
+        "failed",
+        "refunded",
+    ]

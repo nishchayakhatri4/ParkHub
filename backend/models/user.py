@@ -9,13 +9,23 @@ class UserProfile(BaseModel):
     id: UUID
     email: EmailStr
     full_name: str
-    role: Literal["driver", "owner"]
-    verified_owner: bool
+    role: Literal["user", "owner"]
+
+    # Kept for frontend compatibility.
+    verified_owner: bool = False
+
+    license_plate: str | None = None
+    car_model: str | None = None
+
     created_at: datetime
 
 
 class UserUpdate(BaseModel):
-    full_name: str | None = Field(default=None, min_length=2, max_length=100)
+    full_name: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=100,
+    )
 
 
 class MessageResponse(BaseModel):

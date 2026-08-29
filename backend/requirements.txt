@@ -7,3 +7,5 @@ email-validator
 httpx
 stripe
 python-dotenv
+psycopg[binary]
+psycopg-pool

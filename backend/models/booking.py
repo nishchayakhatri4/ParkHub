@@ -21,7 +21,7 @@ Money = Annotated[
 
 
 class BookingCreate(BaseModel):
-    parking_space_id: int
+    parking_id: str
     booking_date: date
     start_time: time
     end_time: time
@@ -30,13 +30,14 @@ class BookingCreate(BaseModel):
     def validate_times(self) -> "BookingCreate":
         if self.start_time >= self.end_time:
             raise ValueError("end_time must be after start_time")
+
         return self
 
 
 class BookingResponse(BaseModel):
     id: UUID
     user_id: UUID
-    parking_space_id: int
+    parking_id: str
     booking_date: date
     start_time: time
     end_time: time
@@ -46,4 +47,3 @@ class BookingResponse(BaseModel):
     checked_out_at: datetime | None = None
     created_at: datetime
     parking_space: dict | None = None
-
