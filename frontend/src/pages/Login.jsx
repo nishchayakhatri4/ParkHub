@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { MapPin, Mail, Lock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -95,6 +96,7 @@ function BrandPanel() {
 }
 
 function LoginForm() {
+  const navigate = useNavigate()
   return (
     <form className="space-y-6">
       <div className="space-y-4">
@@ -183,21 +185,21 @@ function LoginForm() {
         </div>
       </div>
 
-      <Button
-        type="submit"
-        className="
-          h-14
-          w-full
-          rounded-2xl
-          bg-emerald-500
-          text-base
-          font-bold
-          hover:bg-emerald-600
-        "
-      >
-        Sign In
-      </Button>
-
+        <Button
+  type="button"
+  onClick={() => navigate("/home")}
+  className="
+    h-14
+    w-full
+    rounded-2xl
+    bg-emerald-500
+    text-base
+    font-bold
+    hover:bg-emerald-600
+  "
+>
+  Sign In
+</Button>
       <div className="flex items-center gap-3">
         <Separator className="flex-1" />
 
@@ -232,20 +234,20 @@ function LoginForm() {
         <span className="text-slate-600">
           Don&apos;t have an account?
         </span>
-
         <Button
-          type="button"
-          variant="link"
-          className="
-            h-auto
-            p-0
-            text-sm
-            font-bold
-            text-emerald-500
-          "
-        >
-          Sign up
-        </Button>
+  type="button"
+  variant="link"
+  onClick={() => navigate("/register")}
+  className="
+    h-auto
+    p-0
+    text-sm
+    font-bold
+    text-emerald-500
+  "
+>
+  Sign up
+</Button>
       </div>
     </form>
   )
