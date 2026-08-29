@@ -12,7 +12,7 @@
 
 ParkHub is a peer-to-peer parking space sharing platform that connects drivers looking for affordable parking with people who have unused private parking spaces.
 
-Instead of simply showing nearby parking spaces, ParkHub aims to recommend the **best parking option** based on price, distance, availability, ratings, safety, and convenience.
+Instead of simply showing parking spaces, ParkHub recommends the **best available option** for a selected area, date, and time based on hourly price, ratings, and convenience features.
 
 ## Project Overview
 
@@ -23,9 +23,9 @@ ParkHub connects these two sides:
 **Drivers**
 
 * Find available private parking spaces
-* Compare price, distance, ratings, safety, and convenience
+* Compare hourly prices, ratings, and safety features
 * Book parking for specific time periods
-* Pay securely
+* Complete a Stripe test checkout
 * Check in and check out through the app
 
 **Parking Owners**
@@ -40,16 +40,15 @@ ParkHub connects these two sides:
 
 ### Smart Parking Recommendation
 
-ParkHub ranks available parking spaces instead of simply displaying them.
+ParkHub first filters spaces by exact location, date, time, availability, and booking conflicts. It then ranks the matching spaces.
 
 The ranking considers:
 
-* Price
-* Walking distance
-* Availability
+* Hourly price
 * Customer rating
-* Safety
-* Convenience
+* Lighting
+* CCTV
+* Covered parking
 
 Users receive a short list of the best available options.
 
@@ -57,40 +56,45 @@ Example:
 
 ```text
 Best Overall
-$8/day
-4 min walk
+$14/hour
 4.9/5 stars (47 reviews)
 
 Cheapest
-$6/day
-8 min walk
+$10/hour
 4.6/5 stars (31 reviews)
 
-Closest
-$10/day
-2 min walk
+Highest Rated
+$18/hour
+5.0/5 stars (22 reviews)
+
+Best Value
+$12/hour
 4.8/5 stars (22 reviews)
 ```
 
 ### Five-Star Ratings and Reviews
 
-Drivers can rate completed parking bookings from **0 to 5 stars** and leave a written review. Listings show their average star rating and review count so users can compare previous customer experiences.
+The reviews API accepts **1 to 5 stars** and an optional comment after a booking is completed. Each booking can receive one persisted review. Listing ratings are recalculated when persisted reviews change.
 
-Listings also display useful trust and accessibility information, including:
+The checkout page also contains a **0 to 5 star demo control**. Its submit action currently updates the interface only and does not save the selection to the API.
 
-* Owner verification
+Listings display useful information including:
+
 * Lighting
 * CCTV/security
+* Covered parking
 * Accessibility notes
 * Reviews from previous bookings
+
+The verified badges, host details, policies, accessibility notes, and filler reviews currently shown in the frontend are presentation content rather than verified backend data.
 
 Example:
 
 ```text
 4.9/5 stars from 47 reviews
-Verified owner
 Well-lit
 CCTV available
+Covered parking
 ```
 
 ### Time-Based Parking
@@ -102,7 +106,7 @@ Example:
 ```text
 Monday - Friday
 9:00 AM - 4:00 PM
-$7/day
+$7/hour
 ```
 
 This allows unused parking capacity to become a source of income.
@@ -113,13 +117,17 @@ Users can select a parking space and book it for a specific date and time.
 
 ```text
 Search
-   ↓
+   |
+   v
 Select parking
-   ↓
+   |
+   v
 Review booking
-   ↓
+   |
+   v
 Payment
-   ↓
+   |
+   v
 Booking confirmed
 ```
 
@@ -145,11 +153,14 @@ The prototype uses **Stripe Test Mode** to demonstrate a realistic payment workf
 
 ```text
 BOOK NOW
-   ↓
+   |
+   v
 Stripe Checkout
-   ↓
+   |
+   v
 Payment Successful
-   ↓
+   |
+   v
 Booking Confirmed
 ```
 
@@ -159,83 +170,75 @@ Users can view:
 
 * Upcoming bookings
 * Previous bookings
-* Favourite locations
-* Favourite owners
-* Profile information
+* Total booking count
+* Check-in and check-out actions
 
 Owners can view:
 
-* Parking listings
-* Upcoming bookings
-* Earnings
-* Availability
-* Profile information
+* Parking-space summaries
+* Weekly paid booking count
+* Weekly earnings
+* Average rating
+* Active-space count
 
-### Favourite Locations and Owners
+### Favourite Parking Spaces
 
-Users can save frequently used:
-
-* Parking spaces
-* Locations
-* Owners
+The backend API supports listing, adding, and removing favourite parking spaces. A favourites interface is not currently connected in the frontend.
 
 ### Authentication
 
-ParkHub supports separate user and owner accounts.
-
-The prototype may also include a demonstration MFA flow.
+ParkHub supports registration and login for separate driver and owner roles using database-backed application sessions.
 
 ## Tech Stack
 
-| Component       | Technology                |
-| --------------- | ------------------------- |
-| Frontend        | React                     |
-| UI              | shadcn/ui                 |
-| Backend         | FastAPI                   |
-| Database        | Supabase PostgreSQL       |
-| Maps            | Nominatim / OpenStreetMap |
-| Payments        | Stripe                    |
-| Version Control | Git + GitHub              |
+| Component | Technology |
+| --- | --- |
+| Frontend | React 19 and Vite 8 |
+| Styling and UI | Tailwind CSS 4, shadcn/ui, and Base UI |
+| Typography | Inter |
+| Backend | FastAPI |
+| Database | PostgreSQL through psycopg; compatible with Supabase-hosted PostgreSQL |
+| Maps | Folium with OpenStreetMap tiles |
+| Payments | Stripe Test Mode |
+| Version Control | Git and GitHub |
 
 ## Architecture
 
 ```text
-                React Frontend
-                + shadcn/ui
-                     |
-                     | REST API
-                     v
-                FastAPI Backend
-                     |
-          +----------+----------+
-          |          |          |
-          v          v          v
-      Supabase   Nominatim   Stripe
-      PostgreSQL OpenStreetMap Payments
+React + Vite frontend
+        |
+        | REST API and Folium map HTML
+        v
+FastAPI backend
+        |
+        +---- PostgreSQL via psycopg
+        +---- Folium + OpenStreetMap tiles
+        `---- Stripe Test Mode
 ```
 
 ## Project Structure
 
 ```text
 parkhub/
-│
-├── frontend/
-│   ├── src/
-│   ├── components/
-│   ├── pages/
-│   └── lib/
-│
-├── backend/
-│   ├── app/
-│   ├── routers/
-│   ├── services/
-│   └── models/
-│
-├── database/
-│   └── schema.sql
-│
-├── README.md
-└── .gitignore
+|-- frontend/
+|   |-- public/
+|   |-- src/
+|   |   |-- components/
+|   |   |-- lib/
+|   |   `-- pages/
+|   |-- package.json
+|   `-- vite.config.js
+|-- backend/
+|   |-- app/
+|   |-- models/
+|   |-- routers/
+|   |-- services/
+|   `-- requirements.txt
+|-- database/
+|   |-- schema.sql
+|   `-- seed.sql
+|-- README.md
+`-- .gitignore
 ```
 
 ## Database Structure
@@ -243,33 +246,39 @@ parkhub/
 The main database entities are:
 
 ```text
-users
-owners
-parking_spaces
-parking_availability
+accounts
+user_profiles
+garages
+garage_availability
 bookings
-payments
 reviews
 favourites
-check_ins
+payments
+app_sessions
 ```
 
 Basic relationships:
 
 ```text
-User
- ├── Bookings
- ├── Favourites
- └── Reviews
+Account (role: user or owner)
+|-- User profile
+|-- Owned garages
+|-- Bookings
+|-- Reviews
+|-- Favourites
+|-- Payments
+`-- Application sessions
 
-Owner
- ├── Parking Spaces
- └── Bookings
+Garage
+|-- Availability windows
+|-- Bookings
+|-- Reviews
+`-- Favourites
 
-Parking Space
- ├── Availability
- ├── Bookings
- └── Reviews
+Booking
+|-- Check-in and check-out timestamps
+|-- Payment
+`-- Review
 ```
 
 ## Main API Endpoints
@@ -279,36 +288,60 @@ Parking Space
 ```text
 POST /auth/register
 POST /auth/login
-POST /auth/mfa/verify
-GET  /users/me
+```
+
+### Users
+
+```text
+GET   /users/me
+PATCH /users/me
+GET   /users/me/owner-dashboard
 ```
 
 ### Parking
 
 ```text
 GET    /parking/search
-GET    /parking/{id}
+GET    /parking/map
+GET    /parking
+GET    /parking/{parking_id}
 POST   /parking
-PUT    /parking/{id}
-DELETE /parking/{id}
+PUT    /parking/{parking_id}
+DELETE /parking/{parking_id}
 ```
 
 ### Bookings
 
 ```text
 POST /bookings
-GET  /bookings/{id}
-GET  /users/me/bookings
+GET  /bookings/me
+GET  /bookings/{booking_id}
 
-POST /bookings/{id}/check-in
-POST /bookings/{id}/check-out
-POST /bookings/{id}/cancel
+POST /bookings/{booking_id}/check-in
+POST /bookings/{booking_id}/check-out
+POST /bookings/{booking_id}/cancel
+```
+
+### Reviews
+
+```text
+GET  /parking/{parking_id}/reviews
+POST /parking/{parking_id}/reviews
+```
+
+### Favourites
+
+```text
+GET    /favourites
+POST   /favourites/{parking_id}
+DELETE /favourites/{parking_id}
 ```
 
 ### Payments
 
 ```text
 POST /payments/create-checkout
+POST /payments/verify-session
 POST /payments/webhook
 ```
 
@@ -318,56 +351,60 @@ The final hackathon demo should show one complete end-to-end journey:
 
 ```text
 LOGIN
-  ↓
+  |
+  v
 SEARCH LOCATION
-  ↓
+  |
+  v
 SELECT DATE AND TIME
-  ↓
+  |
+  v
 GET TOP 5 PARKING SPACES
-  ↓
+  |
+  v
 VIEW RATINGS AND REVIEWS
-  ↓
+  |
+  v
 SELECT PARKING
-  ↓
+  |
+  v
 BOOK
-  ↓
+  |
+  v
 STRIPE TEST PAYMENT
-  ↓
+  |
+  v
 BOOKING CONFIRMED
-  ↓
+  |
+  v
 CHECK IN
-  ↓
+  |
+  v
 CHECK OUT
-  ↓
+  |
+  v
 OWNER SEES BOOKING AND EARNINGS
 ```
 
 ## Demo Data
 
-To make the application immediately usable during the presentation, the database should be seeded with realistic data.
+[`database/seed.sql`](database/seed.sql) contains the current demonstration dataset:
 
-Suggested demo data:
+- 3 owner accounts
+- 30 parking garages
+- Seeded 0-to-5 listing ratings
+- A mix of open and closed listings
 
-```text
-20 parking spaces
-5 owners
-10 users
-30 reviews
-Multiple availability windows
-Past bookings
-Future bookings
-```
+It does not create driver accounts, bookings, persisted reviews, favourites, payments, or availability windows. Register a driver through the app before testing the booking flow. A garage without availability rows is treated as available unless it conflicts with a booking.
 
-Suggested Sydney locations:
+The API and seed data currently support these exact search areas:
 
 ```text
-University of Sydney
-Broadway
-Redfern
-Central
 Newtown
-Glebe
-Ultimo
+Sydney CBD
+Parramatta
+Bondi
+Manly
 ```
 
 ## Run ParkHub Locally
@@ -376,7 +413,7 @@ Ultimo
 
 Install the following before starting:
 
-- [Node.js](https://nodejs.org/) 20 or later, including npm
+- [Node.js](https://nodejs.org/) 20.19+ on the Node 20 release line, or Node 22.12+, including npm
 - [Python](https://www.python.org/downloads/) 3.11 or later
 - A PostgreSQL database. The project is designed for Supabase PostgreSQL.
 - Stripe test credentials only if you want to exercise the payment flow
@@ -385,7 +422,7 @@ Run every command below from a terminal opened in the repository root.
 
 ### Option 1: Run the frontend only
 
-The interface includes demo content and can be explored without starting the API. Features that save or retrieve live data will not work in this mode.
+The frontend can run by itself for visual inspection. Login, registration, search results, bookings, dashboards, payments, and other data-backed flows require the backend and database.
 
 ```bash
 cd frontend
@@ -427,7 +464,7 @@ STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
 `DATABASE_URL` is required for data-backed features. Stripe values are optional unless you use payments. Use test-mode Stripe keys during local development.
 
-Initialize a new database by running [`database/schema.sql`](database/schema.sql) in the Supabase SQL editor or against your PostgreSQL database.
+Initialize a new database by running [`database/schema.sql`](database/schema.sql) in the Supabase SQL editor or against your PostgreSQL database. To load the current demonstration listings, run [`database/seed.sql`](database/seed.sql) afterward.
 
 #### 2. Start the backend
 
@@ -531,13 +568,17 @@ Potential categories:
 
 ```text
 Parking
-   ↓
+   |
+   v
 Driveways
-   ↓
+   |
+   v
 Garages
-   ↓
+   |
+   v
 Boat Spaces
-   ↓
+   |
+   v
 Storage Spaces
 ```
 
