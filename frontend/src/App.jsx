@@ -1,61 +1,62 @@
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-} from "react-router-dom"
+import { Routes, Route } from "react-router-dom"
 
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import Home from "./pages/Home"
 import Search from "./pages/Search"
 import ParkingDetails from "./pages/ParkingDetails"
+import PaymentPage from "./pages/PaymentPage"
 import UserDashboard from "./pages/UserDashboard"
 import OwnerDashboard from "./pages/OwnerDashboard"
 import NotFound from "./pages/NotFound"
 
-function App() {
+export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
+    <Routes>
+      <Route
+        path="/"
+        element={<Login />}
+      />
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+      <Route
+        path="/register"
+        element={<Register />}
+      />
 
-        <Route
-          path="/home"
-          element={<Home />}
-        />
+      <Route
+        path="/home"
+        element={<Home />}
+      />
 
-        <Route
-          path="/search"
-          element={<Search />}
-        />
+      <Route
+        path="/search"
+        element={<Search />}
+      />
 
-        <Route
-          path="/parking/:id"
-          element={<ParkingDetails />}
-        />
+      <Route
+        path="/parking/:parkingId"
+        element={<ParkingDetails />}
+      />
 
-        <Route
-          path="/dashboard"
-          element={<UserDashboard />}
-        />
+      <Route
+        path="/payment/:bookingId"
+        element={<PaymentPage />}
+      />
 
-        <Route
-          path="/owner/dashboard"
-          element={<OwnerDashboard />}
-        />
+      <Route
+        path="/dashboard"
+        element={<UserDashboard />}
+      />
 
-        <Route
-          path="*"
-          element={<NotFound />}
-        />
-      </Routes>
-    </BrowserRouter>
+      <Route
+        path="/owner"
+        element={<OwnerDashboard />}
+      />
+
+      <Route
+        path="*"
+        element={<NotFound />}
+      />
+    </Routes>
   )
 }
-
-export default App
