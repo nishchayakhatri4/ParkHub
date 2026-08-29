@@ -1,9 +1,16 @@
-from services.supabase import get_connection
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from routers import auth, bookings, favourites, parking, payments, reviews, users
+from routers import (
+    auth,
+    bookings,
+    favourites,
+    parking,
+    payments,
+    reviews,
+    users,
+)
 
 
 settings = get_settings()
@@ -11,12 +18,18 @@ settings = get_settings()
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="Peer-to-peer parking search, booking, payment and review API.",
+    description=(
+        "Peer-to-peer parking search, booking, "
+        "payment and review API."
+    ),
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origin_list,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,6 +50,9 @@ def root():
         "message": "ParkHub API is running"
     }
 
+
 @app.get("/health", tags=["Health"])
 def health() -> dict[str, str]:
-    return {"status": "ok"}
+    return {
+        "status": "ok"
+    }

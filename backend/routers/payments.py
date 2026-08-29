@@ -6,7 +6,7 @@ from psycopg.rows import dict_row
 
 from app.config import get_settings
 from app.dependencies import CurrentUserDep, UserClientDep
-from models.payment import CheckoutRequest, CheckoutResponse
+from models.payment import CheckoutRequest, CheckoutResponse, VerifySessionRequest
 from models.user import MessageResponse
 from services.supabase import get_connection
 
@@ -174,7 +174,7 @@ def create_checkout(
             ],
             success_url=(
                 f"{settings.frontend_url}"
-                "/dashboard"
+                f"/check-in/{booking['id']}"
                 "?payment=success"
                 "&session_id="
                 "{CHECKOUT_SESSION_ID}"
@@ -267,6 +267,124 @@ def create_checkout(
 
 
 @router.post(
+    "/verify-session",
+    response_model=MessageResponse,
+)
+def verify_checkout_session(
+    payload: VerifySessionRequest,
+    current_user: CurrentUserDep,
+    client: UserClientDep,
+) -> MessageResponse:
+    """
+    Verify a completed Stripe Checkout session directly with Stripe.
+
+    This is useful for the local hackathon demo where Stripe webhooks
+    cannot be forwarded from the teammate-owned Stripe sandbox account.
+    The endpoint does not trust the frontend redirect alone. It retrieves
+    the Checkout Session from Stripe using the server-side secret key and
+    only confirms the booking when Stripe reports that payment was paid.
+    """
+
+    _stripe_ready()
+
+    try:
+        session = stripe.checkout.Session.retrieve(
+            payload.session_id
+        )
+        session_data = session.to_dict()
+    except stripe.StripeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not verify Stripe checkout session",
+        ) from exc
+
+    if session_data.get("payment_status") != "paid":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Stripe payment has not been completed",
+        )
+
+    with client.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            """
+            select
+                id,
+                booking_id,
+                user_id,
+                status
+            from public.payments
+            where stripe_session_id = %s
+            """,
+            (payload.session_id,),
+        )
+
+        payment = cur.fetchone()
+
+        if (
+            payment is None
+            or payment["user_id"] != current_user.id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Payment record not found",
+            )
+
+        client_reference_id = session_data.get(
+            "client_reference_id"
+        )
+
+        if (
+            client_reference_id
+            and client_reference_id
+            != str(payment["booking_id"])
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Stripe session does not match booking",
+            )
+
+        payment_intent = session_data.get(
+            "payment_intent"
+        )
+
+        cur.execute(
+            """
+            update public.payments
+            set
+                status = 'paid',
+                stripe_payment_intent_id = %s
+            where
+                id = %s
+                and user_id = %s
+            """,
+            (
+                payment_intent,
+                payment["id"],
+                current_user.id,
+            ),
+        )
+
+        cur.execute(
+            """
+            update public.bookings
+            set status = 'confirmed'
+            where
+                id = %s
+                and user_id = %s
+                and status = 'pending'
+            """,
+            (
+                payment["booking_id"],
+                current_user.id,
+            ),
+        )
+
+    return MessageResponse(
+        message="Payment verified and booking confirmed"
+    )
+
+
+@router.post(
     "/webhook",
     response_model=MessageResponse,
 )
@@ -311,7 +429,13 @@ async def stripe_webhook(
         ) from exc
 
     session = event["data"]["object"]
-    session_id = session.get("id")
+
+    if hasattr(session, "to_dict"):
+        session_data = session.to_dict()
+    else:
+        session_data = session
+
+    session_id = session_data.get("id")
 
     with get_connection() as conn:
         with conn.cursor(
@@ -326,7 +450,7 @@ async def stripe_webhook(
                 if (
                     event["type"]
                     == "checkout.session.completed"
-                    and session.get(
+                    and session_data.get(
                         "payment_status"
                     )
                     != "paid"
@@ -361,7 +485,7 @@ async def stripe_webhook(
                         ),
                     )
 
-                payment_intent = session.get(
+                payment_intent = session_data.get(
                     "payment_intent"
                 )
 

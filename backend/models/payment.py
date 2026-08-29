@@ -14,6 +14,10 @@ class CheckoutResponse(BaseModel):
     session_id: str
 
 
+class VerifySessionRequest(BaseModel):
+    session_id: str
+
+
 class PaymentResponse(BaseModel):
     id: UUID
     booking_id: UUID
