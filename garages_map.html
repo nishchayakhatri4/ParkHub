@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_c8b25f8764392c82728398adbe24d100 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_c8b25f8764392c82728398adbe24d100" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_c8b25f8764392c82728398adbe24d100 = L.map(
+                "map_c8b25f8764392c82728398adbe24d100",
+                {
+                    center: [-33.8981, 151.177],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 13,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+            L.control.scale().addTo(map_c8b25f8764392c82728398adbe24d100);
+
+            
+
+        
+    
+            var tile_layer_76d0428ed218d283c195ae5c67597d46 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_76d0428ed218d283c195ae5c67597d46.addTo(map_c8b25f8764392c82728398adbe24d100);
+        
+    
+            var marker_902b6ccf1251d7b00b137cf6c57b1be9 = L.marker(
+                [-33.8981, 151.177],
+                {
+}
+            ).addTo(map_c8b25f8764392c82728398adbe24d100);
+        
+    
+            var icon_d8cbbdea1a10f949fc01f8a0d185b80e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_dc881792c3aa2bd3427e77d7b26e4bb7 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_22b3b6c6ceae0beecebcf5d637ac5737 = $(`<div id="html_22b3b6c6ceae0beecebcf5d637ac5737" style="width: 100.0%; height: 100.0%;"><b>Newtown</b><br>Search centre</div>`)[0];
+                popup_dc881792c3aa2bd3427e77d7b26e4bb7.setContent(html_22b3b6c6ceae0beecebcf5d637ac5737);
+            
+        
+
+        marker_902b6ccf1251d7b00b137cf6c57b1be9.bindPopup(popup_dc881792c3aa2bd3427e77d7b26e4bb7)
+        ;
+
+        
+    
+    
+            marker_902b6ccf1251d7b00b137cf6c57b1be9.bindTooltip(
+                `<div>
+                     Search centre: Newtown
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_902b6ccf1251d7b00b137cf6c57b1be9.setIcon(icon_d8cbbdea1a10f949fc01f8a0d185b80e);
+            
+    
+            var circle_c4cb7bbb70d71a94629cb92a45f7f507 = L.circle(
+                [-33.8981, 151.177],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.08, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3000.0, "stroke": true, "weight": 3}
+            ).addTo(map_c8b25f8764392c82728398adbe24d100);
+        
+    
+        var popup_59522f5aa307dd97f0e07e1cf410145c = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_cdcf0920cb1c453be9127285ee15814c = $(`<div id="html_cdcf0920cb1c453be9127285ee15814c" style="width: 100.0%; height: 100.0%;">Search radius: 3 km</div>`)[0];
+                popup_59522f5aa307dd97f0e07e1cf410145c.setContent(html_cdcf0920cb1c453be9127285ee15814c);
+            
+        
+
+        circle_c4cb7bbb70d71a94629cb92a45f7f507.bindPopup(popup_59522f5aa307dd97f0e07e1cf410145c)
+        ;
+
+        
+    
+    
+            var feature_group_9d2ff7408779df935646350aa5724c6a = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var marker_19fc27c346b21c82c00e9a83686f62e0 = L.marker(
+                [-33.8976, 151.1792],
+                {
+}
+            ).addTo(feature_group_9d2ff7408779df935646350aa5724c6a);
+        
+    
+            var icon_cfadb26052e16ad7aee961b859ef2eae = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "car",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_7f59efa8163a4f96666106f5be6e44ea = L.popup({
+  "maxWidth": 320,
+});
+
+        
+            
+                var html_d01952660af042160ca0ab99cedf2e2a = $(`<div id="html_d01952660af042160ca0ab99cedf2e2a" style="width: 100.0%; height: 100.0%;">         <div style="width:260px">           <h4>SantaPark</h4>           <b>Parking ID:</b> PARK-001<br>           <b>Area:</b> Newtown<br>           <b>Address:</b> 330 King Street, Newtown NSW 2042<br>           <b>Hourly rate:</b> $10<br>           <b>Score:</b> 4.2/5<br>           <b>Distance:</b> 0.21 km         </div></div>`)[0];
+                popup_7f59efa8163a4f96666106f5be6e44ea.setContent(html_d01952660af042160ca0ab99cedf2e2a);
+            
+        
+
+        marker_19fc27c346b21c82c00e9a83686f62e0.bindPopup(popup_7f59efa8163a4f96666106f5be6e44ea)
+        ;
+
+        
+    
+    
+            marker_19fc27c346b21c82c00e9a83686f62e0.bindTooltip(
+                `<div>
+                     SantaPark — 0.21 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_19fc27c346b21c82c00e9a83686f62e0.setIcon(icon_cfadb26052e16ad7aee961b859ef2eae);
+            
+    
+            var marker_91fa7a1a74a9bd567db885db40b16a9a = L.marker(
+                [-33.9, 151.171],
+                {
+}
+            ).addTo(feature_group_9d2ff7408779df935646350aa5724c6a);
+        
+    
+            var icon_adbf0d91d5b1759cbd83a2932a28ce98 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "car",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_286449f39d799f69e4c81ed8acd4d3e7 = L.popup({
+  "maxWidth": 320,
+});
+
+        
+            
+                var html_457d37aaa5e033ec605c9ea5afda3c85 = $(`<div id="html_457d37aaa5e033ec605c9ea5afda3c85" style="width: 100.0%; height: 100.0%;">         <div style="width:260px">           <h4>EnmorePark</h4>           <b>Parking ID:</b> PARK-024<br>           <b>Area:</b> Newtown<br>           <b>Address:</b> 110 Enmore Road, Newtown NSW 2042<br>           <b>Hourly rate:</b> $14<br>           <b>Score:</b> 4.5/5<br>           <b>Distance:</b> 0.59 km         </div></div>`)[0];
+                popup_286449f39d799f69e4c81ed8acd4d3e7.setContent(html_457d37aaa5e033ec605c9ea5afda3c85);
+            
+        
+
+        marker_91fa7a1a74a9bd567db885db40b16a9a.bindPopup(popup_286449f39d799f69e4c81ed8acd4d3e7)
+        ;
+
+        
+    
+    
+            marker_91fa7a1a74a9bd567db885db40b16a9a.bindTooltip(
+                `<div>
+                     EnmorePark — 0.59 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_91fa7a1a74a9bd567db885db40b16a9a.setIcon(icon_adbf0d91d5b1759cbd83a2932a28ce98);
+            
+    
+            var marker_1e43e3c58bdafe52964ce5289e15341f = L.marker(
+                [-33.8945, 151.1834],
+                {
+}
+            ).addTo(feature_group_9d2ff7408779df935646350aa5724c6a);
+        
+    
+            var icon_e8a530766af5676c2beb77038bda7068 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "car",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_c52d76767ce8a3ba415cb47fec1e932f = L.popup({
+  "maxWidth": 320,
+});
+
+        
+            
+                var html_c0dafda7c002cd4c0398414d3bdb08e3 = $(`<div id="html_c0dafda7c002cd4c0398414d3bdb08e3" style="width: 100.0%; height: 100.0%;">         <div style="width:260px">           <h4>KingStreetGarage</h4>           <b>Parking ID:</b> PARK-023<br>           <b>Area:</b> Newtown<br>           <b>Address:</b> 198 King Street, Newtown NSW 2042<br>           <b>Hourly rate:</b> $16<br>           <b>Score:</b> 4.0/5<br>           <b>Distance:</b> 0.71 km         </div></div>`)[0];
+                popup_c52d76767ce8a3ba415cb47fec1e932f.setContent(html_c0dafda7c002cd4c0398414d3bdb08e3);
+            
+        
+
+        marker_1e43e3c58bdafe52964ce5289e15341f.bindPopup(popup_c52d76767ce8a3ba415cb47fec1e932f)
+        ;
+
+        
+    
+    
+            marker_1e43e3c58bdafe52964ce5289e15341f.bindTooltip(
+                `<div>
+                     KingStreetGarage — 0.71 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_1e43e3c58bdafe52964ce5289e15341f.setIcon(icon_e8a530766af5676c2beb77038bda7068);
+            
+    
+            var marker_fda1da588cbe761334224f2263849bd0 = L.marker(
+                [-33.8885, 151.1774],
+                {
+}
+            ).addTo(feature_group_9d2ff7408779df935646350aa5724c6a);
+        
+    
+            var icon_66b0a0b7d029f7a9cae686a50f8d8faf = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "car",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_f2ef227efa030be2b228238e52a2557e = L.popup({
+  "maxWidth": 320,
+});
+
+        
+            
+                var html_32f65a44bb96c4610f82b75cf3ffeaec = $(`<div id="html_32f65a44bb96c4610f82b75cf3ffeaec" style="width: 100.0%; height: 100.0%;">         <div style="width:260px">           <h4>CamperdownGarage</h4>           <b>Parking ID:</b> PARK-026<br>           <b>Area:</b> Newtown<br>           <b>Address:</b> 25 Missenden Road, Camperdown NSW 2050<br>           <b>Hourly rate:</b> $18<br>           <b>Score:</b> 4.3/5<br>           <b>Distance:</b> 1.07 km         </div></div>`)[0];
+                popup_f2ef227efa030be2b228238e52a2557e.setContent(html_32f65a44bb96c4610f82b75cf3ffeaec);
+            
+        
+
+        marker_fda1da588cbe761334224f2263849bd0.bindPopup(popup_f2ef227efa030be2b228238e52a2557e)
+        ;
+
+        
+    
+    
+            marker_fda1da588cbe761334224f2263849bd0.bindTooltip(
+                `<div>
+                     CamperdownGarage — 1.07 km
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_fda1da588cbe761334224f2263849bd0.setIcon(icon_66b0a0b7d029f7a9cae686a50f8d8faf);
+            
+    
+            feature_group_9d2ff7408779df935646350aa5724c6a.addTo(map_c8b25f8764392c82728398adbe24d100);
+        
+    
+            var layer_control_8e540ef44564dfd8a4868204c0da63e6_layers = {
+                base_layers : {
+                    "openstreetmap" : tile_layer_76d0428ed218d283c195ae5c67597d46,
+                },
+                overlays :  {
+                    "Nearby garages" : feature_group_9d2ff7408779df935646350aa5724c6a,
+                },
+            };
+            let layer_control_8e540ef44564dfd8a4868204c0da63e6 = L.control.layers(
+                layer_control_8e540ef44564dfd8a4868204c0da63e6_layers.base_layers,
+                layer_control_8e540ef44564dfd8a4868204c0da63e6_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": true,
+  "autoZIndex": true,
+}
+            ).addTo(map_c8b25f8764392c82728398adbe24d100);
+
+        
+</script>
+</html>

@@ -1,0 +1,6 @@
+First Name,Last Name,Email,Password,License Plate,Car Model
+Bob,Smith,bob@example.com,03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4,xyz,Toyota
+Sarah,Jones,sarah@example.com,8b26322c9c935f34aa7b4e3f936e2569b20ff74a9e71bf257c2a582a8d9d8207,ygw2jn,Mazda
+Alice,Brown,alice@example.com,4e40e8ffe0ee32fa53e139147ed559229a5930f89c2204706fc174beb36210b3,abc123,Honda
+Charlie,Davis,charlie@example.com,f52fbd32b2b3b86ff88ef6c490628285f482af15ddcb29541f94bcf526a3f6c7,qwe456,Ford
+Diana,Wilson,diana@example.com,1c8bfe8f801d79745c4631d09fff36c82aa37fc4cce4fc946683d7b336b63032,zxc789,Subaru
