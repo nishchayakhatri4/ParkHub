@@ -1,15 +1,20 @@
 from datetime import date, time
+from html import escape
 from typing import Annotated
+from urllib.parse import quote
 from uuid import UUID
 
+import folium
 from fastapi import (
     APIRouter,
     HTTPException,
     Query,
     status,
 )
+from fastapi.responses import HTMLResponse
 from psycopg import Connection
 
+from app.config import get_settings
 from app.dependencies import (
     OwnerDep,
     UserClientDep,
@@ -28,11 +33,20 @@ from services.search import (
 )
 from services.supabase import get_connection
 
-
 router = APIRouter(
     prefix="/parking",
     tags=["Parking"],
 )
+
+settings = get_settings()
+
+LOCATION_CENTERS = {
+    "Newtown": (-33.8970, 151.1790),
+    "Sydney CBD": (-33.8731, 151.2065),
+    "Parramatta": (-33.8150, 151.0030),
+    "Bondi": (-33.8915, 151.2740),
+    "Manly": (-33.7975, 151.2860),
+}
 
 
 def _get_space(
@@ -88,6 +102,224 @@ def search(
             end_time=end_time,
             limit=limit,
         )
+
+@router.get(
+    "/map",
+    response_class=HTMLResponse,
+)
+def parking_map(
+    location: ParkingLocation,
+    booking_date: date,
+    start_time: time,
+    end_time: time,
+    limit: Annotated[
+        int,
+        Query(ge=1, le=20),
+    ] = 5,
+) -> HTMLResponse:
+
+    if start_time >= end_time:
+        raise HTTPException(
+            status_code=
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="end_time must be after start_time",
+        )
+
+    with get_connection() as conn:
+        spaces = search_parking(
+            conn=conn,
+            location=location,
+            booking_date=booking_date,
+            start_time=start_time,
+            end_time=end_time,
+            limit=limit,
+        )
+
+    # Use actual marker positions to centre the map.
+    # If no spaces are found, fall back to the preset
+    # centre of the selected area.
+    if spaces:
+        centre_lat = sum(
+            space["latitude"]
+            for space in spaces
+        ) / len(spaces)
+
+        centre_lon = sum(
+            space["longitude"]
+            for space in spaces
+        ) / len(spaces)
+
+        map_centre = (
+            centre_lat,
+            centre_lon,
+        )
+    else:
+        map_centre = LOCATION_CENTERS[location]
+
+    parking_map = folium.Map(
+        location=map_centre,
+        zoom_start=15,
+        control_scale=True,
+    )
+
+    marker_locations = []
+
+    for space in spaces:
+        latitude = space["latitude"]
+        longitude = space["longitude"]
+
+        marker_locations.append(
+            [latitude, longitude]
+        )
+
+        parking_name = escape(
+            str(space["parking_name"])
+        )
+
+        address = escape(
+            str(space["address"])
+        )
+
+        parking_id = escape(
+            str(space["parking_id"])
+        )
+
+        label = escape(
+            str(space.get("label", "Available"))
+        )
+
+        price = float(
+            space["hourly_rate"]
+        )
+
+        rating = float(
+            space["score"]
+        )
+
+        frontend_url = str(
+            settings.frontend_url
+        ).rstrip("/")
+
+        detail_url = (
+            f"{frontend_url}/parking/"
+            f"{quote(str(space['parking_id']))}"
+        )
+
+        detail_url = escape(
+            detail_url,
+            quote=True,
+        )
+
+        popup_html = f"""
+        <div style="
+            min-width: 220px;
+            font-family: Arial, sans-serif;
+        ">
+            <div style="
+                font-size: 16px;
+                font-weight: 700;
+                margin-bottom: 4px;
+                color: #0f172a;
+            ">
+                {parking_name}
+            </div>
+
+            <div style="
+                color: #64748b;
+                font-size: 12px;
+                margin-bottom: 8px;
+            ">
+                {parking_id}
+            </div>
+
+            <div style="
+                font-size: 13px;
+                margin-bottom: 6px;
+                color: #475569;
+            ">
+                {address}
+            </div>
+
+            <div style="
+                margin-top: 8px;
+                font-size: 14px;
+                color: #0f172a;
+            ">
+                <strong>${price:.2f}/hr</strong>
+            </div>
+
+            <div style="
+                margin-top: 4px;
+                font-size: 13px;
+                color: #475569;
+            ">
+                ★ {rating:.1f}/5
+            </div>
+
+            <div style="
+                display: inline-block;
+                margin-top: 8px;
+                padding: 4px 8px;
+                border-radius: 999px;
+                background: #d1fae5;
+                color: #047857;
+                font-size: 11px;
+                font-weight: 600;
+            ">
+                {label}
+            </div>
+
+            <div style="
+                margin-top: 12px;
+            ">
+                <a
+                    href="{detail_url}"
+                    target="_parent"
+                    style="
+                        display: block;
+                        width: 100%;
+                        box-sizing: border-box;
+                        padding: 9px 12px;
+                        border-radius: 8px;
+                        background: #10b981;
+                        color: white;
+                        text-align: center;
+                        text-decoration: none;
+                        font-size: 13px;
+                        font-weight: 700;
+                    "
+                >
+                    View Space
+                </a>
+            </div>
+        </div>
+        """
+
+        folium.Marker(
+            location=[
+                latitude,
+                longitude,
+            ],
+            tooltip=parking_name,
+            popup=folium.Popup(
+                popup_html,
+                max_width=300,
+            ),
+        ).add_to(parking_map)
+
+    # Automatically frame all returned garages.
+    if len(marker_locations) > 1:
+        parking_map.fit_bounds(
+            marker_locations,
+            padding=(30, 30),
+        )
+
+    html = parking_map.get_root().render()
+
+    return HTMLResponse(
+        content=html,
+        status_code=200,
+    )
 
 
 @router.get(

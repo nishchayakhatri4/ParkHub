@@ -9,3 +9,4 @@ stripe
 python-dotenv
 psycopg[binary]
 psycopg-pool
+folium

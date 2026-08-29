@@ -31,6 +31,12 @@ app.include_router(favourites.router)
 app.include_router(payments.router)
 
 
+@app.get("/")
+def root():
+    return {
+        "message": "ParkHub API is running"
+    }
+
 @app.get("/health", tags=["Health"])
 def health() -> dict[str, str]:
     return {"status": "ok"}
