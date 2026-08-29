@@ -295,6 +295,8 @@ def parking_map(
         </div>
         """
 
+        price_label = f"${price:g}"
+
         folium.Marker(
             location=[
                 latitude,
@@ -304,6 +306,49 @@ def parking_map(
             popup=folium.Popup(
                 popup_html,
                 max_width=300,
+            ),
+            icon=folium.Icon(
+                color="green",
+                icon="",
+                prefix="fa",
+            ),
+        ).add_to(parking_map)
+
+        folium.Marker(
+            location=[
+                latitude,
+                longitude,
+            ],
+            tooltip=parking_name,
+            popup=folium.Popup(
+                popup_html,
+                max_width=300,
+            ),
+            icon=folium.DivIcon(
+                html=f"""
+                <div style="
+                  position: absolute;
+                  left: 50%;
+                  top: 50%;
+                  transform: translate(-50%, -50%);
+                  background: rgba(255,255,255,0.96);
+                  border: 1px solid rgba(15,23,42,0.18);
+                  border-radius: 999px;
+                  padding: 4px 8px;
+                  font-size: 12px;
+                  font-weight: 800;
+                  color: #0f172a;
+                  box-shadow: 0 3px 10px rgba(15,23,42,0.14);
+                  white-space: nowrap;
+                  line-height: 1;
+                  z-index: 1000;
+                ">
+                  {price_label}
+                </div>
+                """,
+                class_name="",
+                icon_size=(18, 18),
+                icon_anchor=(9, 9),
             ),
         ).add_to(parking_map)
 

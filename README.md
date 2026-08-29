@@ -428,9 +428,22 @@ Glebe
 Ultimo
 ```
 
-## Running the Project
+## Run ParkHub Locally
 
-### Frontend
+### Prerequisites
+
+Install the following before starting:
+
+- [Node.js](https://nodejs.org/) 20 or later, including npm
+- [Python](https://www.python.org/downloads/) 3.11 or later
+- A PostgreSQL database. The project is designed for Supabase PostgreSQL.
+- Stripe test credentials only if you want to exercise the payment flow
+
+Run every command below from a terminal opened in the repository root.
+
+### Option 1: Run the frontend only
+
+The interface includes demo content and can be explored without starting the API. Features that save or retrieve live data will not work in this mode.
 
 ```bash
 cd frontend
@@ -438,36 +451,120 @@ npm install
 npm run dev
 ```
 
-### Backend
+Open [http://localhost:5173](http://localhost:5173).
+
+### Option 2: Run the complete application
+
+The frontend and backend must run at the same time. Use two terminal windows.
+
+#### 1. Configure the backend
+
+Copy the environment template:
+
+**Windows PowerShell**
+
+```powershell
+Copy-Item backend/.env.example backend/.env
+```
+
+**macOS or Linux**
 
 ```bash
-cd backend
-
-python -m venv .venv
-source .venv/bin/activate
-
-pip install -r requirements.txt
-
-uvicorn app.main:app --reload
+cp backend/.env.example backend/.env
 ```
 
-### Environment Variables
-
-Create a `.env` file for local development.
-
-Example:
+Open `backend/.env` and provide your own values:
 
 ```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
-
-STRIPE_SECRET_KEY=your_stripe_test_key
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@db.YOUR_PROJECT_REF.supabase.co:5432/postgres
+FRONTEND_URL=http://localhost:5173
+CORS_ORIGINS=http://localhost:5173
+STRIPE_SECRET_KEY=your_stripe_test_secret_key
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-
-LLM_API_KEY=your_llm_api_key
 ```
 
-Do not commit `.env` files or API keys to GitHub.
+`DATABASE_URL` is required for data-backed features. Stripe values are optional unless you use payments. Use test-mode Stripe keys during local development.
+
+Initialize a new database by running [`database/schema.sql`](database/schema.sql) in the Supabase SQL editor or against your PostgreSQL database.
+
+#### 2. Start the backend
+
+Create the virtual environment from the repository root:
+
+```bash
+python -m venv .venv
+```
+
+Activate it:
+
+**Windows PowerShell**
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+**Windows Command Prompt**
+
+```bat
+.venv\Scripts\activate.bat
+```
+
+**macOS or Linux**
+
+```bash
+source .venv/bin/activate
+```
+
+Install the Python dependencies and start FastAPI:
+
+```bash
+pip install -r backend/requirements.txt
+uvicorn app.main:app --reload --app-dir backend --port 8000
+```
+
+Confirm the API is running:
+
+- Health check: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+- Interactive API documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+#### 3. Start the frontend
+
+In a second terminal, from the repository root:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend uses `http://127.0.0.1:8000` as its default API URL. To change it, create or update `frontend/.env`:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+Open [http://localhost:5173](http://localhost:5173) and keep both terminals running.
+
+### Useful development commands
+
+Run these inside `frontend/`:
+
+```bash
+npm run dev      # Start the Vite development server
+npm run build    # Create a production build
+npm run preview  # Preview the production build locally
+npm run lint     # Check the frontend source with ESLint
+```
+
+To stop either development server, press `Ctrl+C` in its terminal.
+
+### Troubleshooting
+
+- If port `5173` is already in use, Vite will display the alternate URL it selected.
+- If the UI cannot reach the API, verify that FastAPI is running on port `8000` and that `VITE_API_URL` matches it.
+- If API requests return `503 Database is not configured`, check `DATABASE_URL` in `backend/.env` and restart FastAPI.
+- If PowerShell blocks virtual-environment activation, run `Set-ExecutionPolicy -Scope Process Bypass`, then activate the environment again.
+- Never commit `.env` files, database passwords, or API keys.
 
 ## Git Workflow
 
@@ -553,6 +650,5 @@ The goal is to deliver one **polished, working end-to-end experience** that clea
 ## License
 
 This project is being developed as a hackathon prototype.
-
 
 
