@@ -99,7 +99,7 @@ export default function Register() {
 
   return (
     <main className="min-h-screen bg-slate-100 md:flex md:items-center md:justify-center md:p-8">
-      <div className="w-full bg-white md:grid md:max-w-5xl md:grid-cols-2 md:overflow-hidden md:rounded-3xl md:border md:shadow-xl">
+      <div className="w-full bg-stone-50 md:grid md:max-w-5xl md:grid-cols-2 md:overflow-hidden md:rounded-3xl md:border md:shadow-xl">
         <section className="flex flex-col items-center justify-center bg-slate-900 px-6 py-12 text-center md:min-h-[720px]">
           <BrandLogo className="h-auto w-full max-w-[260px] rounded-xl object-contain" />
 
@@ -107,7 +107,7 @@ export default function Register() {
             Join ParkHub
           </h1>
 
-          <p className="mt-2 max-w-sm text-sm text-slate-400">
+          <p className="mt-2 max-w-sm text-sm text-slate-300">
             Find affordable parking or earn money from your unused space.
           </p>
         </section>
@@ -116,6 +116,7 @@ export default function Register() {
           <form
             onSubmit={handleSubmit}
             className="mx-auto max-w-md space-y-6"
+            aria-busy={loading}
           >
             <div>
               <h2 className="text-2xl font-bold text-slate-900">
@@ -127,10 +128,17 @@ export default function Register() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Card
+            <fieldset>
+              <legend className="sr-only">Choose how you will use ParkHub</legend>
+              <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
                 onClick={() => setRole("driver")}
-                className={`cursor-pointer ${
+                aria-pressed={role === "driver"}
+                className="rounded-xl text-left focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-emerald-500/50"
+              >
+              <Card
+                className={`h-full cursor-pointer ${
                   role === "driver"
                     ? "border-emerald-500 bg-emerald-50"
                     : ""
@@ -144,10 +152,16 @@ export default function Register() {
                   </span>
                 </CardContent>
               </Card>
+              </button>
 
-              <Card
+              <button
+                type="button"
                 onClick={() => setRole("owner")}
-                className={`cursor-pointer ${
+                aria-pressed={role === "owner"}
+                className="rounded-xl text-left focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-emerald-500/50"
+              >
+              <Card
+                className={`h-full cursor-pointer ${
                   role === "owner"
                     ? "border-emerald-500 bg-emerald-50"
                     : ""
@@ -161,12 +175,16 @@ export default function Register() {
                   </span>
                 </CardContent>
               </Card>
-            </div>
+              </button>
+              </div>
+            </fieldset>
 
             <FormField
+              id="full-name"
               label="Full Name"
               icon={<User />}
               type="text"
+              autoComplete="name"
               placeholder="Alex Mercer"
               value={fullName}
               onChange={(event) =>
@@ -175,9 +193,11 @@ export default function Register() {
             />
 
             <FormField
+              id="register-email"
               label="Email Address"
               icon={<Mail />}
               type="email"
+              autoComplete="email"
               placeholder="alex@example.com"
               value={email}
               onChange={(event) =>
@@ -186,9 +206,11 @@ export default function Register() {
             />
 
             <FormField
+              id="register-password"
               label="Password"
               icon={<Lock />}
               type="password"
+              autoComplete="new-password"
               placeholder="Create a password"
               value={password}
               onChange={(event) =>
@@ -197,7 +219,7 @@ export default function Register() {
             />
 
             {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              <div role="alert" aria-live="assertive" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -205,7 +227,7 @@ export default function Register() {
             <Button
               type="submit"
               disabled={loading}
-              className="h-14 w-full rounded-2xl bg-emerald-500 font-bold hover:bg-emerald-600"
+              className="h-14 w-full rounded-2xl bg-emerald-700 font-bold hover:bg-emerald-800"
             >
               {loading ? (
                 <>
@@ -222,7 +244,7 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="font-bold text-emerald-500"
+                className="min-h-11 rounded-md px-2 font-bold text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
               >
                 Sign in
               </button>
@@ -235,13 +257,14 @@ export default function Register() {
 }
 
 function FormField({
+  id,
   label,
   icon,
   ...props
 }) {
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label htmlFor={id}>{label}</Label>
 
       <div className="relative">
         <span className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500 [&>svg]:h-5 [&>svg]:w-5">
@@ -249,6 +272,7 @@ function FormField({
         </span>
 
         <Input
+          id={id}
           {...props}
           className="h-[52px] rounded-xl bg-slate-50 pl-12"
           required

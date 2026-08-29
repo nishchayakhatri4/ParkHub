@@ -11,7 +11,7 @@ export default function NotFound() {
       <div className="text-center">
         <BrandLogo className="mx-auto mb-8 h-auto w-full max-w-[220px] object-contain" />
 
-        <p className="text-sm font-bold text-emerald-500">
+        <p className="text-sm font-bold text-emerald-700">
           404
         </p>
 
@@ -25,7 +25,7 @@ export default function NotFound() {
 
         <Button
           onClick={() => navigate("/home")}
-          className="mt-6 bg-emerald-500 hover:bg-emerald-600"
+          className="mt-6 bg-emerald-700 hover:bg-emerald-800"
         >
           Return Home
         </Button>

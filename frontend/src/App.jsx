@@ -65,16 +65,9 @@ export default function App() {
       />
 
       <Route
-        path="/owner"
-        element={<OwnerDashboard />}
-      />
-
-      <Route
         path="/owner/dashboard"
         element={<OwnerDashboard />}
       />
     </Routes>
-
-    
   )
 }

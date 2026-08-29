@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 
 import AppHeader from "@/components/AppHeader"
+import AppFooter from "@/components/AppFooter"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -31,6 +32,8 @@ export default function UserDashboard() {
 
   useEffect(() => {
     loadDashboard()
+    // Fetch once when the dashboard mounts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function loadDashboard() {
@@ -164,8 +167,9 @@ export default function UserDashboard() {
       <div className="min-h-screen bg-slate-50">
         <AppHeader />
 
-        <div className="flex min-h-[60vh] items-center justify-center">
+        <div id="main-content" role="status" aria-live="polite" className="flex min-h-[60vh] items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+          <span className="sr-only">Loading your bookings</span>
         </div>
       </div>
     )
@@ -175,9 +179,9 @@ export default function UserDashboard() {
     <div className="min-h-screen bg-slate-50">
       <AppHeader />
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-8">
-          <p className="text-sm font-semibold text-emerald-500">
+          <p className="text-sm font-semibold text-emerald-700">
             DRIVER DASHBOARD
           </p>
 
@@ -193,7 +197,7 @@ export default function UserDashboard() {
         )}
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div role="alert" aria-live="assertive" className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -266,11 +270,12 @@ export default function UserDashboard() {
                   </div>
 
                   <Button
+                    onClick={() => navigate(`/check-in/${upcomingBooking.id}`)}
                     disabled={
                       upcomingBooking.status
                       !== "confirmed"
                     }
-                    className="h-14 w-full rounded-2xl bg-emerald-500 font-bold hover:bg-emerald-600"
+                    className="h-14 w-full rounded-2xl bg-emerald-700 font-bold hover:bg-emerald-800"
                   >
                     {upcomingBooking.status === "confirmed"
                       ? "CHECK IN"
@@ -280,7 +285,7 @@ export default function UserDashboard() {
                   </Button>
 
                   {upcomingBooking.status === "pending" && (
-                    <p className="text-center text-xs text-amber-600">
+                    <p className="text-center text-xs text-amber-800">
                       This booking has not been confirmed by
                       payment yet.
                     </p>
@@ -298,7 +303,7 @@ export default function UserDashboard() {
 
                   <Button
                     onClick={() => navigate("/search")}
-                    className="mt-5 bg-emerald-500 hover:bg-emerald-600"
+                    className="mt-5 bg-emerald-700 hover:bg-emerald-800"
                   >
                     Find parking
                   </Button>
@@ -338,6 +343,7 @@ export default function UserDashboard() {
           </div>
         </div>
       </main>
+      <AppFooter />
     </div>
   )
 }

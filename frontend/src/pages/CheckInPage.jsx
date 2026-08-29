@@ -8,9 +8,11 @@ import {
   LogIn,
   LogOut,
   MapPin,
+  Star,
 } from "lucide-react"
 
 import AppHeader from "@/components/AppHeader"
+import AppFooter from "@/components/AppFooter"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,9 +35,13 @@ export default function CheckInPage() {
   const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
+  const [reviewRating, setReviewRating] = useState(0)
+  const [reviewSubmitted, setReviewSubmitted] = useState(false)
 
   useEffect(() => {
     loadBooking()
+    // The route id is the intentional refresh boundary.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookingId])
 
   async function loadBooking() {
@@ -191,8 +197,9 @@ export default function CheckInPage() {
       <div className="min-h-screen bg-slate-50">
         <AppHeader />
 
-        <div className="flex min-h-[65vh] items-center justify-center">
+        <div id="main-content" role="status" aria-live="polite" className="flex min-h-[65vh] items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+          <span className="sr-only">Loading parking session</span>
         </div>
       </div>
     )
@@ -203,10 +210,10 @@ export default function CheckInPage() {
       <div className="min-h-screen bg-slate-50">
         <AppHeader />
 
-        <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+        <main id="main-content" className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="font-semibold text-red-600">
+              <p role="alert" className="font-semibold text-red-700">
                 {error}
               </p>
 
@@ -234,9 +241,9 @@ export default function CheckInPage() {
     <div className="min-h-screen bg-slate-50">
       <AppHeader />
 
-      <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
         <div className="mb-8">
-          <p className="text-sm font-semibold text-emerald-500">
+          <p className="text-sm font-semibold text-emerald-700">
             PARKING SESSION
           </p>
 
@@ -257,7 +264,7 @@ export default function CheckInPage() {
         )}
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div role="alert" aria-live="assertive" className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -316,7 +323,8 @@ export default function CheckInPage() {
                   changeBookingState("check-in")
                 }
                 disabled={actionLoading}
-                className="h-14 w-full gap-2 rounded-2xl bg-emerald-500 text-base font-bold hover:bg-emerald-600"
+                aria-busy={actionLoading}
+                className="h-14 w-full gap-2 rounded-2xl bg-emerald-700 text-base font-bold hover:bg-emerald-800"
               >
                 {actionLoading ? (
                   <>
@@ -338,6 +346,7 @@ export default function CheckInPage() {
                   changeBookingState("check-out")
                 }
                 disabled={actionLoading}
+                aria-busy={actionLoading}
                 className="h-14 w-full gap-2 rounded-2xl bg-slate-900 text-base font-bold hover:bg-slate-800"
               >
                 {actionLoading ? (
@@ -355,21 +364,97 @@ export default function CheckInPage() {
             )}
 
             {booking.status === "completed" && (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center">
-                <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500" />
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+                  <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-600" />
 
-                <p className="mt-3 font-bold text-emerald-800">
-                  Parking session completed
-                </p>
+                  <p className="mt-3 font-bold text-emerald-800">
+                    Parking session completed
+                  </p>
 
-                <p className="mt-1 text-sm text-emerald-700">
-                  You have successfully checked out.
-                </p>
+                  <p className="mt-1 text-sm text-emerald-700">
+                    You have successfully checked out.
+                  </p>
+                </div>
+
+                <fieldset className="rounded-2xl border border-slate-200 bg-stone-50 p-5">
+                  <legend className="px-1 text-base font-bold text-slate-900">
+                    Rate your parking experience
+                  </legend>
+
+                  <p className="mt-1 text-sm text-slate-600">
+                    Select a rating from 0 to 5 stars.
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <label className="flex min-h-11 cursor-pointer items-center rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 has-[:checked]:border-emerald-700 has-[:checked]:bg-emerald-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-600">
+                      <input
+                        type="radio"
+                        name="review-rating"
+                        value="0"
+                        checked={reviewRating === 0}
+                        onChange={() => {
+                          setReviewRating(0)
+                          setReviewSubmitted(false)
+                        }}
+                        className="sr-only"
+                      />
+                      0 stars
+                    </label>
+
+                    {[1, 2, 3, 4, 5].map((rating) => (
+                      <label
+                        key={rating}
+                        className="flex size-11 cursor-pointer items-center justify-center rounded-lg has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-600"
+                      >
+                        <input
+                          type="radio"
+                          name="review-rating"
+                          value={rating}
+                          checked={reviewRating === rating}
+                          onChange={() => {
+                            setReviewRating(rating)
+                            setReviewSubmitted(false)
+                          }}
+                          className="sr-only"
+                          aria-label={`${rating} ${rating === 1 ? "star" : "stars"}`}
+                        />
+                        <Star
+                          className={`h-8 w-8 ${
+                            rating <= reviewRating
+                              ? "fill-amber-400 text-amber-600"
+                              : "text-slate-300"
+                          }`}
+                        />
+                      </label>
+                    ))}
+                  </div>
+
+                  <p className="mt-3 text-sm font-medium text-slate-700" aria-live="polite">
+                    Selected: {reviewRating} out of 5 stars
+                  </p>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={reviewSubmitted}
+                    onClick={() => setReviewSubmitted(true)}
+                    className="mt-4 w-full"
+                  >
+                    {reviewSubmitted ? "Review submitted" : "Submit review"}
+                  </Button>
+
+                  {reviewSubmitted && (
+                    <p role="status" className="mt-3 text-center text-sm font-medium text-emerald-700">
+                      Thanks for sharing your feedback.
+                    </p>
+                  )}
+                </fieldset>
               </div>
             )}
 
             {booking.status === "pending" && (
-              <p className="text-center text-sm text-amber-600">
+              <p className="text-center text-sm text-amber-800">
                 Payment must be confirmed before you can check in.
               </p>
             )}
@@ -384,6 +469,7 @@ export default function CheckInPage() {
           </CardContent>
         </Card>
       </main>
+      <AppFooter />
     </div>
   )
 }

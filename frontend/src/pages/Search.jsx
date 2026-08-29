@@ -5,6 +5,7 @@ import {
 } from "lucide-react"
 
 import AppHeader from "@/components/AppHeader"
+import AppFooter from "@/components/AppFooter"
 import ParkingCard from "@/components/ParkingCard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,10 +21,29 @@ const LOCATIONS = [
   "Parramatta",
   "Bondi",
   "Manly",
+  "Melbourne",
+  "Brisbane",
+  "Perth",
+  "Adelaide",
+  "Canberra",
+  "Hobart",
+  "Darwin",
+  "Gold Coast",
+  "Newcastle",
+  "Wollongong",
+  "Geelong",
 ]
 
 export default function Search() {
-  const [location, setLocation] = useState("Newtown")
+  const requestedLocation = new URLSearchParams(
+    window.location.search
+  ).get("location")
+
+  const [location, setLocation] = useState(
+    LOCATIONS.includes(requestedLocation)
+      ? requestedLocation
+      : "Newtown"
+  )
   const [date, setDate] = useState("2026-09-01")
   const [startTime, setStartTime] = useState("14:00")
   const [endTime, setEndTime] = useState("16:00")
@@ -94,13 +114,15 @@ export default function Search() {
   // Initial search
   useEffect(() => {
     searchParking()
+    // Run the default search once; subsequent searches are user initiated.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
     <div className="min-h-screen bg-slate-50">
       <AppHeader />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main id="main-content" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
         {/* Heading */}
         <div className="mb-8">
@@ -115,7 +137,7 @@ export default function Search() {
         </div>
 
         {/* Search controls */}
-        <div className="mb-8 rounded-2xl border bg-white p-4">
+        <div className="mb-8 rounded-2xl border bg-stone-50 p-4">
           <div className="grid gap-4 md:grid-cols-4">
 
             {/* Location */}
@@ -131,12 +153,12 @@ export default function Search() {
                   setLocation(event.target.value)
                 }
                 className="
-                  flex h-10 w-full
+                  flex h-11 w-full
                   rounded-md
                   border border-input
                   bg-background
                   px-3 py-2
-                  text-sm
+                  text-base
                   ring-offset-background
                   focus-visible:outline-none
                   focus-visible:ring-2
@@ -207,12 +229,13 @@ export default function Search() {
           <Button
             onClick={searchParking}
             disabled={loading}
+            aria-busy={loading}
             className="
               mt-4
               w-full
               gap-2
-              bg-emerald-500
-              hover:bg-emerald-600
+              bg-emerald-700
+              hover:bg-emerald-800
               sm:w-auto
             "
           >
@@ -232,7 +255,7 @@ export default function Search() {
 
         {/* Error */}
         {error && (
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div role="alert" aria-live="assertive" className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -252,8 +275,9 @@ export default function Search() {
 
         {/* Loading */}
         {loading && (
-          <div className="flex justify-center py-20">
+          <div role="status" aria-live="polite" className="flex justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+            <span className="sr-only">Searching for available parking</span>
           </div>
         )}
 
@@ -274,7 +298,7 @@ export default function Search() {
                   overflow-hidden
                   rounded-2xl
                   border
-                  bg-white
+                  bg-stone-50
                   shadow-sm
                   lg:sticky
                   lg:top-6
@@ -295,6 +319,7 @@ export default function Search() {
                     key={mapUrl}
                     src={mapUrl}
                     title={`Parking map for ${location}`}
+                    loading="lazy"
                     className="
                       h-[420px]
                       w-full
@@ -303,7 +328,7 @@ export default function Search() {
                     "
                   />
                 ) : (
-                  <div className="flex h-[420px] items-center justify-center text-sm text-slate-400">
+                  <div className="flex h-[420px] items-center justify-center text-sm text-slate-500">
                     Search to view parking on the map.
                   </div>
                 )}
@@ -313,7 +338,7 @@ export default function Search() {
             {/* Parking results */}
             <div className="order-2 lg:order-1">
               {parkingSpaces.length === 0 ? (
-                <div className="rounded-2xl border bg-white p-10 text-center">
+                <div className="rounded-2xl border bg-stone-50 p-10 text-center">
                   <p className="font-semibold text-slate-900">
                     No parking spaces found
                   </p>
@@ -348,6 +373,7 @@ export default function Search() {
         )}
 
       </main>
+      <AppFooter />
     </div>
   )
 }

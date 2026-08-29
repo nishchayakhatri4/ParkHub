@@ -12,6 +12,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import AppHeader from "@/components/AppHeader";
+import AppFooter from "@/components/AppFooter";
 import {
   Card,
   CardContent,
@@ -119,8 +120,9 @@ export default function PaymentPage() {
     return (
       <div className="min-h-screen bg-slate-50">
         <AppHeader />
-        <div className="flex min-h-[65vh] items-center justify-center">
+        <div id="main-content" role="status" aria-live="polite" className="flex min-h-[65vh] items-center justify-center">
           <Loader2 className="h-7 w-7 animate-spin text-emerald-500" />
+          <span className="sr-only">Loading booking details</span>
         </div>
       </div>
     );
@@ -130,10 +132,10 @@ export default function PaymentPage() {
     return (
       <div className="min-h-screen bg-slate-50">
         <AppHeader />
-        <div className="flex min-h-[65vh] items-center justify-center px-4">
+        <div id="main-content" className="flex min-h-[65vh] items-center justify-center px-4">
           <Card className="w-full max-w-md">
             <CardContent className="pt-6">
-              <p className="text-center text-sm text-red-600">
+              <p role="alert" className="text-center text-sm text-red-700">
                 {error || "Booking could not be found."}
               </p>
             </CardContent>
@@ -151,7 +153,7 @@ export default function PaymentPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <AppHeader />
-      <main className="mx-auto w-full max-w-lg px-4 py-6">
+      <main id="main-content" className="mx-auto w-full max-w-lg px-4 py-6">
         {/* Header */}
         <div className="mb-6 flex items-center gap-3">
           <Button
@@ -159,6 +161,7 @@ export default function PaymentPage() {
             size="icon"
             onClick={() => navigate(-1)}
             className="rounded-full"
+            aria-label="Go back"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
@@ -261,7 +264,7 @@ export default function PaymentPage() {
         </Card>
 
         {/* Stripe information */}
-        <div className="mb-5 flex gap-3 rounded-xl border bg-white p-4">
+        <div className="mb-5 flex gap-3 rounded-xl border bg-stone-50 p-4">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
 
           <div>
@@ -278,7 +281,7 @@ export default function PaymentPage() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div role="alert" aria-live="assertive" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -287,7 +290,8 @@ export default function PaymentPage() {
         <Button
           onClick={handlePayment}
           disabled={paying}
-          className="h-12 w-full bg-emerald-500 text-base font-semibold text-white hover:bg-emerald-600"
+          aria-busy={paying}
+          className="h-12 w-full bg-emerald-700 text-base font-semibold text-white hover:bg-emerald-800"
         >
           {paying ? (
             <>
@@ -302,10 +306,11 @@ export default function PaymentPage() {
           )}
         </Button>
 
-        <p className="mt-4 text-center text-xs text-slate-400">
+        <p className="mt-4 text-center text-sm text-slate-500">
           Booking ID: {booking.id}
         </p>
       </main>
+      <AppFooter />
     </div>
   );
 }

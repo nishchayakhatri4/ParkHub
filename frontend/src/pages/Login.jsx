@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
+  Building2,
   Loader2,
   Lock,
   Mail,
@@ -20,7 +21,7 @@ export default function Login() {
     <main className="min-h-screen bg-slate-100 md:flex md:items-center md:justify-center md:p-8">
       <div
         className="
-          min-h-screen w-full overflow-hidden bg-white
+          min-h-screen w-full overflow-hidden bg-stone-50
           md:min-h-0
           md:max-w-5xl
           md:rounded-3xl
@@ -79,6 +80,9 @@ function BrandPanel() {
         src="/banners/login.png"
         alt="Driver finding nearby parking with ParkHub"
         className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+        width="761"
+        height="1024"
+        fetchPriority="high"
       />
 
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950/95 via-slate-950/25 to-transparent" />
@@ -106,12 +110,19 @@ function LoginForm() {
   const [password, setPassword] = useState("")
 
   const [loading, setLoading] = useState(false)
+  const [loginMode, setLoginMode] = useState(null)
   const [error, setError] = useState("")
 
   async function handleSubmit(event) {
     event.preventDefault()
 
+    const requestedMode =
+      event.nativeEvent.submitter?.value === "owner"
+        ? "owner"
+        : "user"
+
     setLoading(true)
+    setLoginMode(requestedMode)
     setError("")
 
     try {
@@ -149,6 +160,12 @@ function LoginForm() {
         )
       }
 
+      if (requestedMode === "owner" && data.user?.role !== "owner") {
+        throw new Error(
+          "This account is not registered as a parking owner."
+        )
+      }
+
       // Save authentication token
       localStorage.setItem(
         "access_token",
@@ -163,7 +180,7 @@ function LoginForm() {
         )
       }
 
-      navigate("/home")
+      navigate(data.user?.role === "owner" ? "/owner" : "/home")
     } catch (err) {
       console.error("Login error:", err)
 
@@ -174,6 +191,7 @@ function LoginForm() {
       )
     } finally {
       setLoading(false)
+      setLoginMode(null)
     }
   }
 
@@ -181,6 +199,7 @@ function LoginForm() {
     <form
       className="space-y-6"
       onSubmit={handleSubmit}
+      aria-busy={loading}
     >
       <div className="space-y-4">
 
@@ -188,7 +207,7 @@ function LoginForm() {
         <div className="space-y-2">
           <Label
             htmlFor="email"
-            className="text-[13px] font-semibold text-slate-600"
+            className="text-sm font-semibold text-slate-700"
           >
             Email Address
           </Label>
@@ -219,7 +238,7 @@ function LoginForm() {
                 border-slate-200
                 bg-slate-50
                 pl-12
-                text-[15px]
+                text-base
                 text-slate-900
                 shadow-none
                 focus-visible:ring-emerald-500
@@ -232,7 +251,7 @@ function LoginForm() {
         <div className="space-y-2">
           <Label
             htmlFor="password"
-            className="text-[13px] font-semibold text-slate-600"
+            className="text-sm font-semibold text-slate-700"
           >
             Password
           </Label>
@@ -263,7 +282,7 @@ function LoginForm() {
                 border-slate-200
                 bg-slate-50
                 pl-12
-                text-[15px]
+                text-base
                 text-slate-900
                 shadow-none
                 focus-visible:ring-emerald-500
@@ -279,9 +298,9 @@ function LoginForm() {
             className="
               h-auto
               p-0
-              text-[13px]
+              text-sm
               font-semibold
-              text-emerald-500
+              text-emerald-700
             "
           >
             Forgot Password?
@@ -292,6 +311,8 @@ function LoginForm() {
       {/* Login error */}
       {error && (
         <div
+          role="alert"
+          aria-live="assertive"
           className="
             rounded-xl
             border
@@ -300,7 +321,7 @@ function LoginForm() {
             px-4
             py-3
             text-sm
-            text-red-600
+            text-red-700
           "
         >
           {error}
@@ -310,18 +331,20 @@ function LoginForm() {
       {/* Sign in */}
       <Button
         type="submit"
+        name="login-mode"
+        value="user"
         disabled={loading}
         className="
           h-14
           w-full
           rounded-2xl
-          bg-emerald-500
+          bg-emerald-700
           text-base
           font-bold
-          hover:bg-emerald-600
+          hover:bg-emerald-800
         "
       >
-        {loading ? (
+        {loading && loginMode === "user" ? (
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Signing in...
@@ -331,10 +354,31 @@ function LoginForm() {
         )}
       </Button>
 
+      <Button
+        type="submit"
+        name="login-mode"
+        value="owner"
+        variant="outline"
+        disabled={loading}
+        className="h-14 w-full gap-2 rounded-2xl border-slate-300 bg-stone-50 text-base font-bold text-slate-900 hover:bg-stone-100"
+      >
+        {loading && loginMode === "owner" ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Signing in as owner...
+          </>
+        ) : (
+          <>
+            <Building2 className="h-5 w-5" />
+            Owner Login
+          </>
+        )}
+      </Button>
+
       <div className="flex items-center gap-3">
         <Separator className="flex-1" />
 
-        <span className="text-xs font-medium text-slate-400">
+        <span className="text-sm font-medium text-slate-500">
           or continue with
         </span>
 
@@ -377,7 +421,7 @@ function LoginForm() {
             p-0
             text-sm
             font-bold
-            text-emerald-500
+            text-emerald-700
           "
         >
           Sign up

@@ -21,12 +21,20 @@ export default function ParkingCard({ parking, imageSrc, imageIndex = 0 }) {
   return (
     <Card className="overflow-hidden border-slate-200 shadow-sm transition hover:shadow-md">
 
-      <img
-        src={parkingImage}
-        alt={`${parking.parking_name} parking space`}
-        className="h-40 w-full object-cover"
-        loading="lazy"
-      />
+      <div className="relative">
+        <img
+          src={parkingImage}
+          alt={`${parking.parking_name} parking space`}
+          className="h-40 w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+
+        <Badge className="absolute right-3 top-3 gap-1 border border-emerald-200 bg-stone-50/95 text-emerald-800 shadow-sm hover:bg-stone-50">
+          <BadgeCheck className="h-4 w-4" />
+          Verified
+        </Badge>
+      </div>
 
       <CardContent className="space-y-4 p-5">
 
@@ -44,7 +52,7 @@ export default function ParkingCard({ parking, imageSrc, imageIndex = 0 }) {
               {parking.parking_name}
             </h3>
 
-            <p className="mt-1 text-xs font-medium text-slate-400">
+            <p className="mt-1 text-xs font-medium text-slate-500">
               {parking.parking_id}
             </p>
           </div>
@@ -84,15 +92,6 @@ export default function ParkingCard({ parking, imageSrc, imageIndex = 0 }) {
             </span>
           </div>
 
-          {/* Owner verification */}
-          {parking.owner?.verified_owner && (
-            <div className="flex items-center gap-2 text-emerald-600">
-              <BadgeCheck className="h-4 w-4" />
-
-              Verified owner
-            </div>
-          )}
-
           {/* CCTV */}
           {parking.has_cctv && (
             <div className="flex items-center gap-2">
@@ -104,19 +103,9 @@ export default function ParkingCard({ parking, imageSrc, imageIndex = 0 }) {
 
         </div>
 
-        {/* Recommendation score */}
-        {parking.recommendation_score !== undefined && (
-          <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
-            Recommendation score:{" "}
-            <strong className="text-slate-700">
-              {parking.recommendation_score}
-            </strong>
-          </div>
-        )}
-
         {/* Details */}
         <Button
-          className="w-full bg-emerald-500 hover:bg-emerald-600"
+          className="w-full bg-emerald-700 hover:bg-emerald-800"
           onClick={() =>
             navigate(
               `/parking/${parking.parking_id}?image=${imageIndex}`,

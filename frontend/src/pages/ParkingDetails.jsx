@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom"
 import {
   BadgeCheck,
   Camera,
+  ChevronDown,
   Clock,
   Lightbulb,
   Loader2,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react"
 
 import AppHeader from "@/components/AppHeader"
+import AppFooter from "@/components/AppFooter"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -21,6 +23,33 @@ import { PARKING_IMAGES } from "@/lib/parkingImages"
 
 const API_URL =
   import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
+
+const DEMO_REVIEWS = [
+  {
+    name: "Maya L.",
+    initials: "ML",
+    rating: 5,
+    date: "2 weeks ago",
+    comment:
+      "Easy to find, exactly as described, and plenty of room to park. I would happily book this space again.",
+  },
+  {
+    name: "Daniel R.",
+    initials: "DR",
+    rating: 4,
+    date: "1 month ago",
+    comment:
+      "A convenient spot in a great location. Entry instructions were clear and the area felt secure.",
+  },
+  {
+    name: "Priya S.",
+    initials: "PS",
+    rating: 5,
+    date: "2 months ago",
+    comment:
+      "Smooth booking experience and a very tidy parking space. Perfect for an afternoon visit nearby.",
+  },
+]
 
 export default function ParkingDetails() {
   const { parkingId } = useParams()
@@ -200,7 +229,7 @@ export default function ParkingDetails() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-3">
+        <div role="status" aria-live="polite" className="flex flex-col items-center gap-3">
           <Loader2 className="h-7 w-7 animate-spin text-emerald-500" />
 
           <p className="text-sm text-slate-500">
@@ -219,7 +248,7 @@ export default function ParkingDetails() {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <Card className="w-full max-w-md">
           <CardContent className="space-y-4 p-6 text-center">
-            <p className="text-red-600">
+            <p role="alert" className="text-red-700">
               {error ||
                 "Parking space not found."}
             </p>
@@ -253,7 +282,7 @@ export default function ParkingDetails() {
     <div className="min-h-screen bg-slate-50">
       <AppHeader />
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="grid gap-8 lg:grid-cols-[1.5fr_0.8fr]">
 
           {/* LEFT SIDE */}
@@ -263,22 +292,30 @@ export default function ParkingDetails() {
               src={parkingImage}
               alt={`${parking.parking_name} parking space`}
               className="h-80 w-full rounded-3xl object-cover md:h-[430px]"
+              decoding="async"
             />
 
             <div className="mt-8">
 
               {/* Open badge */}
-              <Badge
-                className={
-                  parking.is_open
-                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
-                    : "bg-red-100 text-red-700 hover:bg-red-100"
-                }
-              >
-                {parking.is_open
-                  ? "Available"
-                  : "Unavailable"}
-              </Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge
+                  className={
+                    parking.is_open
+                      ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+                      : "bg-red-100 text-red-700 hover:bg-red-100"
+                  }
+                >
+                  {parking.is_open
+                    ? "Available"
+                    : "Unavailable"}
+                </Badge>
+
+                <Badge className="gap-1 border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-50">
+                  <BadgeCheck className="h-4 w-4" />
+                  Verified
+                </Badge>
+              </div>
 
               {/* Parking name */}
               <h1 className="mt-3 text-3xl font-extrabold text-slate-900">
@@ -369,6 +406,115 @@ export default function ParkingDetails() {
                   )}
                 </div>
               </div>
+
+              {/* Additional parking information */}
+              <section className="mt-8 border-t pt-6" aria-labelledby="parking-info-heading">
+                <h2 id="parking-info-heading" className="text-xl font-bold text-slate-900">
+                  Things to know
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Review the space policies and access information before booking.
+                </p>
+
+                <div className="mt-5 divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-stone-50">
+                  <ExpandableInfo title="Cancellation policy">
+                    <p>
+                      Cancel up to 2 hours before your booking starts for a full refund.
+                      Cancellations made later may be charged for the first booked hour.
+                      Bookings that have already started are non-refundable.
+                    </p>
+                  </ExpandableInfo>
+
+                  <ExpandableInfo title="Host details">
+                    <p>
+                      Hosted by {parking.owner?.full_name || "a verified ParkHub owner"}.
+                      The host typically responds within an hour and provides final entry
+                      instructions after your booking is confirmed.
+                    </p>
+                    <div className="mt-3 flex items-center gap-2 font-semibold text-emerald-800">
+                      <BadgeCheck className="h-4 w-4" aria-hidden="true" />
+                      Verified ParkHub host
+                    </div>
+                  </ExpandableInfo>
+
+                  <ExpandableInfo title="Accessibility notes">
+                    <p>
+                      Vehicle access is step-free and suitable for standard passenger cars.
+                      Pedestrian access conditions may vary, so contact the host before booking
+                      if you need a wider bay or an accessible path to the street.
+                    </p>
+                  </ExpandableInfo>
+
+                  <ExpandableInfo title="Additional information">
+                    <ul className="list-disc space-y-2 pl-5">
+                      <li>Enter your vehicle registration before arrival.</li>
+                      <li>Park only within the marked bay shown in the arrival instructions.</li>
+                      <li>Do not leave personal items or waste in the parking space.</li>
+                      <li>Electric vehicle charging is not included unless the host confirms it.</li>
+                    </ul>
+                  </ExpandableInfo>
+                </div>
+              </section>
+
+              {/* Demo reviews */}
+              <section className="mt-8 border-t pt-6" aria-labelledby="reviews-heading">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <h2 id="reviews-heading" className="text-xl font-bold text-slate-900">
+                      Guest reviews
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Feedback from recent ParkHub bookings.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 rounded-full bg-amber-50 px-3 py-2">
+                    <Star className="h-5 w-5 fill-amber-400 text-amber-600" aria-hidden="true" />
+                    <span className="font-bold text-slate-900">
+                      {Number(parking.score || 4.8).toFixed(1)}
+                    </span>
+                    <span className="text-sm text-slate-600">
+                      ({parking.review_count || DEMO_REVIEWS.length})
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-4">
+                  {DEMO_REVIEWS.map((review) => (
+                    <article
+                      key={review.name}
+                      className="rounded-2xl border border-slate-200 bg-stone-50 p-5"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-800"
+                            aria-hidden="true"
+                          >
+                            {review.initials}
+                          </div>
+
+                          <div>
+                            <h3 className="font-bold text-slate-900">
+                              {review.name}
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                              {review.date}
+                            </p>
+                          </div>
+                        </div>
+
+                        <ReviewStars rating={review.rating} />
+                      </div>
+
+                      <p className="mt-4 text-sm leading-6 text-slate-600">
+                        {review.comment}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              </section>
             </div>
           </section>
 
@@ -478,7 +624,7 @@ export default function ParkingDetails() {
 
               {/* Error */}
               {error && (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                <div role="alert" aria-live="assertive" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {error}
                 </div>
               )}
@@ -490,7 +636,8 @@ export default function ParkingDetails() {
                   !parking.is_open
                 }
                 onClick={handleBooking}
-                className="h-14 w-full rounded-2xl bg-emerald-500 text-base font-bold hover:bg-emerald-600"
+                aria-busy={booking}
+                className="h-14 w-full rounded-2xl bg-emerald-700 text-base font-bold hover:bg-emerald-800"
               >
                 {booking ? (
                   <>
@@ -502,7 +649,7 @@ export default function ParkingDetails() {
                 )}
               </Button>
 
-              <p className="text-center text-xs text-slate-400">
+              <p className="text-center text-sm text-slate-500">
                 You will review your booking
                 before continuing to payment.
               </p>
@@ -511,6 +658,47 @@ export default function ParkingDetails() {
           </Card>
         </div>
       </main>
+      <AppFooter />
+    </div>
+  )
+}
+
+function ExpandableInfo({ title, children }) {
+  return (
+    <details className="group">
+      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5 py-3 font-bold text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-600 [&::-webkit-details-marker]:hidden">
+        {title}
+        <ChevronDown
+          className="h-5 w-5 shrink-0 text-slate-500 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none"
+          aria-hidden="true"
+        />
+      </summary>
+
+      <div className="px-5 pb-5 text-sm leading-6 text-slate-600">
+        {children}
+      </div>
+    </details>
+  )
+}
+
+function ReviewStars({ rating }) {
+  return (
+    <div
+      className="flex shrink-0 gap-0.5"
+      role="img"
+      aria-label={`${rating} out of 5 stars`}
+    >
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          aria-hidden="true"
+          className={`h-4 w-4 ${
+            star <= rating
+              ? "fill-amber-400 text-amber-600"
+              : "text-slate-300"
+          }`}
+        />
+      ))}
     </div>
   )
 }
@@ -521,7 +709,7 @@ function Info({
   text,
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border bg-white p-4">
+    <div className="flex items-center gap-3 rounded-xl border bg-stone-50 p-4">
 
       <div className="text-emerald-500">
         {icon}
