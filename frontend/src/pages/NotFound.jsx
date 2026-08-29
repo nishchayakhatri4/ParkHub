@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom"
 
+import BrandLogo from "@/components/BrandLogo"
 import { Button } from "@/components/ui/button"
 
 export default function NotFound() {
@@ -8,6 +9,8 @@ export default function NotFound() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="text-center">
+        <BrandLogo className="mx-auto mb-8 h-auto w-full max-w-[220px] object-contain" />
+
         <p className="text-sm font-bold text-emerald-500">
           404
         </p>

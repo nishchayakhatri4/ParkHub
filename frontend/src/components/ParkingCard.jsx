@@ -14,16 +14,19 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-export default function ParkingCard({ parking }) {
+export default function ParkingCard({ parking, imageSrc, imageIndex = 0 }) {
   const navigate = useNavigate()
+  const parkingImage = parking.image_url || imageSrc
 
   return (
     <Card className="overflow-hidden border-slate-200 shadow-sm transition hover:shadow-md">
 
-      {/* Temporary image placeholder */}
-      <div className="flex h-40 items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
-        <MapPin className="h-10 w-10 text-slate-400" />
-      </div>
+      <img
+        src={parkingImage}
+        alt={`${parking.parking_name} parking space`}
+        className="h-40 w-full object-cover"
+        loading="lazy"
+      />
 
       <CardContent className="space-y-4 p-5">
 
@@ -116,7 +119,8 @@ export default function ParkingCard({ parking }) {
           className="w-full bg-emerald-500 hover:bg-emerald-600"
           onClick={() =>
             navigate(
-              `/parking/${parking.parking_id}`
+              `/parking/${parking.parking_id}?image=${imageIndex}`,
+              { state: { parkingImage } }
             )
           }
         >

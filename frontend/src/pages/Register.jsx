@@ -6,10 +6,10 @@ import {
   Loader2,
   Lock,
   Mail,
-  MapPin,
   User,
 } from "lucide-react"
 
+import BrandLogo from "@/components/BrandLogo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -101,11 +101,9 @@ export default function Register() {
     <main className="min-h-screen bg-slate-100 md:flex md:items-center md:justify-center md:p-8">
       <div className="w-full bg-white md:grid md:max-w-5xl md:grid-cols-2 md:overflow-hidden md:rounded-3xl md:border md:shadow-xl">
         <section className="flex flex-col items-center justify-center bg-slate-900 px-6 py-12 text-center md:min-h-[720px]">
-          <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-emerald-500">
-            <MapPin className="h-8 w-8 text-white" />
-          </div>
+          <BrandLogo className="h-auto w-full max-w-[260px] rounded-xl object-contain" />
 
-          <h1 className="mt-4 text-3xl font-extrabold text-white">
+          <h1 className="mt-6 text-3xl font-extrabold text-white">
             Join ParkHub
           </h1>
 

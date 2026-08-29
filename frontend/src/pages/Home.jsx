@@ -19,46 +19,60 @@ export default function Home() {
       <AppHeader />
 
       <main>
-        <section className="bg-slate-900">
-          <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-24">
-            <p className="font-semibold text-emerald-400">
-              Parking made simple
-            </p>
+        <section className="border-b border-slate-200 bg-white">
+          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:py-16">
+            <div className="text-left">
+              <p className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                Parking made simple
+              </p>
 
-            <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-extrabold tracking-tight text-white md:text-6xl">
-              Find parking without the stress.
-            </h1>
+              <h1 className="mt-5 max-w-xl text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+                Find parking without the stress.
+              </h1>
 
-            <p className="mx-auto mt-5 max-w-xl text-slate-400">
-              Book affordable private parking close to where you actually
-              need to be.
-            </p>
+              <p className="mt-5 max-w-lg text-base leading-7 text-slate-600 md:text-lg">
+                Book affordable private parking close to where you actually
+                need to be.
+              </p>
 
-            <div className="mx-auto mt-10 max-w-3xl rounded-2xl bg-white p-4 shadow-xl">
-              <div className="grid gap-3 md:grid-cols-[1fr_180px_auto]">
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
+              <div className="mt-8 max-w-xl rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+                <div className="grid gap-3 xl:grid-cols-[1fr_160px_auto]">
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+
+                    <Input
+                      className="h-12 border-slate-200 bg-slate-50 pl-12 shadow-none"
+                      placeholder="Where are you going?"
+                      defaultValue="University of Sydney"
+                    />
+                  </div>
 
                   <Input
-                    className="h-12 pl-12"
-                    placeholder="Where are you going?"
-                    defaultValue="University of Sydney"
+                    className="h-12 border-slate-200 bg-slate-50 shadow-none"
+                    type="date"
                   />
+
+                  <Button
+                    onClick={() => navigate("/search")}
+                    className="h-12 gap-2 bg-emerald-600 px-5 font-semibold hover:bg-emerald-700"
+                  >
+                    <Search className="h-4 w-4" />
+                    Find Parking
+                  </Button>
                 </div>
-
-                <Input
-                  className="h-12"
-                  type="date"
-                />
-
-                <Button
-                  onClick={() => navigate("/search")}
-                  className="h-12 gap-2 bg-emerald-500 hover:bg-emerald-600"
-                >
-                  <Search className="h-4 w-4" />
-                  Find Parking
-                </Button>
               </div>
+
+              <p className="mt-4 text-xs font-medium text-slate-400">
+                No subscription required &middot; Secure booking &middot; Instant confirmation
+              </p>
+            </div>
+
+            <div className="overflow-hidden rounded-3xl bg-slate-100 shadow-sm">
+              <img
+                src="/banners/hero.png"
+                alt="Driver reserving a shared parking space with ParkHub"
+                className="aspect-[4/3] h-full w-full object-cover"
+              />
             </div>
           </div>
         </section>

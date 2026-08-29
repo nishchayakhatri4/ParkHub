@@ -4,9 +4,9 @@ import {
   Loader2,
   Lock,
   Mail,
-  MapPin,
 } from "lucide-react"
 
+import BrandLogo from "@/components/BrandLogo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -65,40 +65,32 @@ function BrandPanel() {
   return (
     <section
       className="
-        flex flex-col items-center
-        bg-slate-900
+        relative isolate flex min-h-[340px]
+        flex-col items-start justify-end
+        overflow-hidden
         px-6
-        pb-12
-        pt-12
-        text-center
-        md:justify-center
+        py-10
+        text-left
+        md:min-h-[680px]
         md:p-12
       "
     >
-      <div
-        className="
-          flex h-16 w-16
-          items-center justify-center
-          rounded-[20px]
-          bg-emerald-500
-        "
-      >
-        <MapPin
-          className="h-8 w-8 text-white"
-          strokeWidth={2.3}
-        />
-      </div>
+      <img
+        src="/banners/login.png"
+        alt="Driver finding nearby parking with ParkHub"
+        className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+      />
 
-      <h1 className="mt-4 text-[28px] font-extrabold text-white">
-        ParkHub
-      </h1>
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950/95 via-slate-950/25 to-transparent" />
 
-      <p className="mt-1 text-[13px] font-medium text-slate-400">
+      <BrandLogo className="h-auto w-full max-w-[210px] rounded-xl object-contain shadow-sm" />
+
+      <p className="mt-5 text-sm font-semibold text-white">
         Park smart. Save time. Stress less.
       </p>
 
-      <div className="mt-10 hidden max-w-xs md:block">
-        <p className="text-sm leading-6 text-slate-400">
+      <div className="mt-3 hidden max-w-sm md:block">
+        <p className="text-sm leading-6 text-slate-200">
           Find convenient private parking near your destination
           and book it in seconds.
         </p>
@@ -349,12 +341,12 @@ function LoginForm() {
         <Separator className="flex-1" />
       </div>
 
-      {/* Social login placeholders */}
+      {/* Social sign-in */}
       <div className="grid grid-cols-2 gap-3">
         <Button
           type="button"
           variant="outline"
-          className="h-[52px] rounded-xl font-semibold"
+          className="h-[52px] gap-2 rounded-xl font-semibold"
         >
           <GoogleIcon />
           Google
@@ -363,7 +355,7 @@ function LoginForm() {
         <Button
           type="button"
           variant="outline"
-          className="h-[52px] rounded-xl font-semibold"
+          className="h-[52px] gap-2 rounded-xl font-semibold"
         >
           <AppleIcon />
           Apple
@@ -397,27 +389,39 @@ function LoginForm() {
 
 function GoogleIcon() {
   return (
-    <div
-      className="
-        mr-1
-        flex h-5 w-5
-        items-center justify-center
-        rounded-full
-        border-2
-        border-slate-900
-        text-[10px]
-        font-bold
-      "
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 18 18"
+      className="h-5 w-5 shrink-0"
     >
-      G
-    </div>
+      <path
+        fill="#4285F4"
+        d="M17.64 9.205c0-.638-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.797 2.715v2.258h2.909c1.702-1.567 2.684-3.875 2.684-6.613Z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.468-.806 5.956-2.182l-2.909-2.258c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.585-5.037-3.715H.956v2.332A9 9 0 0 0 9 18Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.963 10.705A5.41 5.41 0 0 1 3.682 9c0-.592.102-1.168.281-1.705V4.963H.956A9 9 0 0 0 0 9c0 1.452.347 2.826.956 4.037l3.007-2.332Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.58c1.321 0 2.507.454 3.441 1.346l2.581-2.582C13.464.892 11.426 0 9 0A9 9 0 0 0 .956 4.963l3.007 2.332C4.672 5.165 6.656 3.58 9 3.58Z"
+      />
+    </svg>
   )
 }
 
 function AppleIcon() {
   return (
-    <span className="mr-1 text-xl leading-none">
-      ●
-    </span>
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 384 512"
+      className="h-5 w-5 shrink-0 fill-black"
+    >
+      <path d="M279.55 258.94c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C44.7 131.1 4 158.6 4 214.6c0 16.1 2.9 32.2 8.8 48.2 7.9 22.9 36.4 79.2 66.1 78.3 15.5-.4 26.5-11 46.7-11 19.6 0 29.8 11 47.1 11 29.9-.4 55.6-51.2 63.1-74.2-40.1-18.9-56.3-55.3-56.3-108Zm-23.2-164.4c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 72 26.1 2 49.9-11.4 69.5-34.4Z" />
+    </svg>
   )
 }

@@ -6,10 +6,10 @@ import {
 
 import AppHeader from "@/components/AppHeader"
 import ParkingCard from "@/components/ParkingCard"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PARKING_IMAGES } from "@/lib/parkingImages"
 
 const API_URL =
   import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
@@ -332,10 +332,12 @@ export default function Search() {
                     xl:grid-cols-2
                   "
                 >
-                  {parkingSpaces.map((parking) => (
+                  {parkingSpaces.map((parking, index) => (
                     <ParkingCard
                       key={parking.parking_id}
                       parking={parking}
+                      imageSrc={PARKING_IMAGES[index % PARKING_IMAGES.length]}
+                      imageIndex={index % PARKING_IMAGES.length}
                     />
                   ))}
                 </div>

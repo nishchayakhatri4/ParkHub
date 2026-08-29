@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import AppHeader from "@/components/AppHeader";
 import {
   Card,
   CardContent,
@@ -116,22 +117,28 @@ export default function PaymentPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-7 w-7 animate-spin text-emerald-500" />
+      <div className="min-h-screen bg-slate-50">
+        <AppHeader />
+        <div className="flex min-h-[65vh] items-center justify-center">
+          <Loader2 className="h-7 w-7 animate-spin text-emerald-500" />
+        </div>
       </div>
     );
   }
 
   if (!booking) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <p className="text-center text-sm text-red-600">
-              {error || "Booking could not be found."}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-slate-50">
+        <AppHeader />
+        <div className="flex min-h-[65vh] items-center justify-center px-4">
+          <Card className="w-full max-w-md">
+            <CardContent className="pt-6">
+              <p className="text-center text-sm text-red-600">
+                {error || "Booking could not be found."}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -143,6 +150,7 @@ export default function PaymentPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <AppHeader />
       <main className="mx-auto w-full max-w-lg px-4 py-6">
         {/* Header */}
         <div className="mb-6 flex items-center gap-3">

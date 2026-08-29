@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import {
   BadgeCheck,
   Camera,
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PARKING_IMAGES } from "@/lib/parkingImages"
 
 const API_URL =
   import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
@@ -24,6 +25,7 @@ const API_URL =
 export default function ParkingDetails() {
   const { parkingId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [parking, setParking] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -236,6 +238,17 @@ export default function ParkingDetails() {
     )
   }
 
+  const requestedImageIndex = Number(
+    new URLSearchParams(location.search).get("image")
+  )
+  const fallbackImage = Number.isInteger(requestedImageIndex) &&
+    requestedImageIndex >= 0 &&
+    requestedImageIndex < PARKING_IMAGES.length
+    ? PARKING_IMAGES[requestedImageIndex]
+    : PARKING_IMAGES[0]
+  const parkingImage =
+    parking.image_url || location.state?.parkingImage || fallbackImage
+
   return (
     <div className="min-h-screen bg-slate-50">
       <AppHeader />
@@ -246,10 +259,11 @@ export default function ParkingDetails() {
           {/* LEFT SIDE */}
           <section>
 
-            {/* Placeholder image */}
-            <div className="flex h-80 items-center justify-center rounded-3xl bg-gradient-to-br from-slate-200 to-slate-400 md:h-[430px]">
-              <MapPin className="h-16 w-16 text-slate-500" />
-            </div>
+            <img
+              src={parkingImage}
+              alt={`${parking.parking_name} parking space`}
+              className="h-80 w-full rounded-3xl object-cover md:h-[430px]"
+            />
 
             <div className="mt-8">
 
